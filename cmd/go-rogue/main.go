@@ -19,10 +19,16 @@ const (
 )
 
 func main() {
-	game := engine.NewGame(gameCols, gameRows, charWidth, charHeight, playerX, playerY)
+	player := engine.NewEntity(playerX, playerY, "@", engine.NewColor(255, 255, 255))
+	npc := engine.NewEntity(gameCols/2-5, gameRows/2, "@", engine.NewColor(255, 255, 0))
+	npcs := append(([]*engine.Entity)(nil), npc)
+	game, err := engine.NewGame(gameCols, gameRows, charWidth, charHeight, player, npcs)
+	if err != nil {
+		log.Fatal(err)
+	}
 	ebiten.SetWindowSize(gameCols*charWidth, gameRows*charHeight)
 	ebiten.SetWindowTitle("Yet Another Roguelike Tutorial")
-	err := ebiten.RunGame(game)
+	err = ebiten.RunGame(game)
 	if err != nil && err != ebiten.Termination {
 		log.Fatal(err)
 	}

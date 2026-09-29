@@ -9,14 +9,14 @@ func NewEscapeAction() *EscapeAction {
 	return &EscapeAction{}
 }
 
-// InterfaceGuard
+// Interface Guard
 var _ Action = (*EscapeAction)(nil)
 
-type MovementAction struct {
-	dx int
-	dy int
-}
+type MovementAction struct{ dx, dy int }
 
-func NewMovementAction(dx int, dy int) *MovementAction {
+func NewMovementAction(dx, dy int) *MovementAction {
 	return &MovementAction{dx: dx, dy: dy}
 }
+
+// Interface Guard
+var _ Action = (*MovementAction)(nil)
