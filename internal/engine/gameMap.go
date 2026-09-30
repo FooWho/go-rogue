@@ -1,23 +1,27 @@
 package engine
 
+import (
+	"image/color"
+)
+
 type Graphic struct {
 	char string
-	fg   *Color
-	bg   *Color
+	fg   color.NRGBA
+	bg   color.NRGBA
 }
 
-func NewGraphic(char string, fg, bg *Color) *Graphic {
+func NewGraphic(char string, fg, bg color.NRGBA) *Graphic {
 	return &Graphic{char: char, fg: fg, bg: bg}
 }
 
 type Tile struct {
 	walkable    bool
 	transparent bool
-	dark        *Graphic
+	darkGraphic *Graphic
 }
 
 func NewTile(walkable, transparent bool, dark *Graphic) *Tile {
-	return &Tile{walkable: walkable, transparent: transparent, dark: dark}
+	return &Tile{walkable: walkable, transparent: transparent, darkGraphic: dark}
 }
 
 type GameMap struct {
@@ -50,5 +54,5 @@ func (gm *GameMap) InBounds(x, y int) bool {
 	return 0 <= x && x < gm.cols && 0 <= y && y < gm.rows
 }
 
-var floor = NewTile(true, true, NewGraphic(" ", NewColor(255, 255, 255), NewColor(50, 50, 150)))
-var wall = NewTile(false, false, NewGraphic(" ", NewColor(255, 255, 255), NewColor(0, 0, 100)))
+var floor = NewTile(true, true, NewGraphic(" ", color.NRGBA{R: 255, G: 255, B: 255, A: 255}, color.NRGBA{R: 50, G: 50, B: 150, A: 255}))
+var wall = NewTile(false, false, NewGraphic(" ", color.NRGBA{R: 255, G: 255, B: 255, A: 255}, color.NRGBA{R: 0, G: 0, B: 100, A: 255}))

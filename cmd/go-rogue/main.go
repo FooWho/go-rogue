@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image/color"
 	"log"
 
 	"github.com/FooWho/go-rogue/internal/engine"
@@ -19,8 +20,8 @@ const (
 )
 
 func main() {
-	player := engine.NewEntity(playerX, playerY, "@", engine.NewColor(255, 255, 255))
-	npc := engine.NewEntity(gameCols/2-5, gameRows/2, "@", engine.NewColor(255, 255, 0))
+	player := engine.NewEntity(playerX, playerY, "@", color.NRGBA{R: 255, G: 255, B: 255, A: 255})
+	npc := engine.NewEntity(gameCols/2-5, gameRows/2, "@", color.NRGBA{R: 255, G: 255, B: 0, A: 255})
 	npcs := append(([]*engine.Entity)(nil), npc)
 	game, err := engine.NewGame(gameCols, gameRows, charWidth, charHeight, player, npcs)
 	if err != nil {
