@@ -14,7 +14,7 @@ import (
 // Game represents the game state. It tracks the size of the viewport onto the
 // map, the size of the tiles, tracks the player and other entities, stores
 // sprite sheet the game is using, and the game map. The whitePixel field is
-// a convience used when applying foreground and background colors to tiles.
+// a convenience used when applying foreground and background colors to tiles.
 // func NewGame() should be used to create the Game structure.
 type Game struct {
 	viewportCols, viewportRows int
@@ -26,7 +26,7 @@ type Game struct {
 	whitePixel                 *ebiten.Image
 }
 
-// This function is used to create a Game struct. It is called with the
+// NewGame creates and initializes a new Game struct. It is called with the
 // viewport size, the tile size, the player, and the other entities.
 // Internally, it also handles loading the sprite sheet and the game map,
 // as well as setting up the whitePixel.
@@ -36,49 +36,62 @@ func NewGame(
 	player *Entity,
 	npcs []*Entity,
 ) (*Game, error) {
-	game := &Game{}
-	game.viewportCols = viewportCols
-	game.viewportRows = viewportRows
-	game.tileWidth = tileWidth
-	game.tileHeight = tileHeight
-	game.player = player
-	game.entities = make([]*Entity, 0, 50)
-	game.entities = append(game.entities, player)
-	game.entities = append(game.entities, npcs...)
 	tileset, err := loadTileset(tileWidth, tileHeight)
 	if err != nil {
 		return nil, err
 	}
-	game.spriteSheet = tileset
-	game.gameMap = NewGameMap(viewportCols, viewportRows)
-	game.whitePixel = ebiten.NewImage(1, 1)
-	game.whitePixel.Fill(color.White)
+	whitePixel := ebiten.NewImage(1, 1)
+	whitePixel.Fill(color.White)
+	game := &Game{
+		viewportCols: viewportCols,
+		viewportRows: viewportRows,
+		tileWidth:    tileWidth,
+		tileHeight:   tileHeight,
+		player:       player,
+		entities:     append([]*Entity{player}, npcs...),
+		spriteSheet:  tileset,
+		gameMap:      NewGameMap(viewportCols, viewportRows),
+		whitePixel:   whitePixel,
+	}
 	return game, nil
 }
 
+// SpriteSheet is a map of an asset name to an asset image. The images
+// are extracted from one large sprite sheet during the construction of the
+// Game struct.
 type SpriteSheet map[string]*ebiten.Image
 
+// Update is called 60 times per second for the game state to update.
+// Currently, it gets an Event from the Game's EventHandler method.
+// This will be a MovementAction or an EscapeAction. EscapeAction will
+// cause the program to terminate gracefully. If it is a MovementAction, it
+// checks if the move is legal, and if so calls the player's Move
+// method.
 func (g *Game) Update() error {
 	action := g.EventHandler()
 	if action == nil {
 		return nil
 	}
-	if action != nil {
-		switch v := action.(type) {
-		case *MovementAction:
-			legalMove := g.gameMap.InBounds(g.player.x+v.dx, g.player.y+v.dy) &&
-				g.gameMap.tiles[g.gameMap.GetIndex(g.player.x+v.dx, g.player.y+v.dy)].walkable
-			if legalMove {
-				g.player.Move(v.dx, v.dy)
-			}
-		case *EscapeAction:
-			return ebiten.Termination
-		default:
+	switch v := action.(type) {
+	case *MovementAction:
+		legalMove := g.gameMap.InBounds(g.player.x+v.dx, g.player.y+v.dy) &&
+			g.gameMap.tiles[g.gameMap.GetIndex(g.player.x+v.dx, g.player.y+v.dy)].walkable
+		if legalMove {
+			g.player.Move(v.dx, v.dy)
 		}
+	case *EscapeAction:
+		return ebiten.Termination
+	default:
 	}
 	return nil
 }
 
+// Draw is called 60 times per second, after Update, and performs the screen
+// refresh. It first draws the background and foreground for the GameMap tiles,
+// then it draws the entities. The call to Scale on the ebiten.DrawImageOptions
+// struct in the entity drawing loop is because currently it isn't needed.
+// The entity graphics are the size of a tile. If that changed in the
+// this might be needed, but for now I am leaving it there to remind me.
 func (g *Game) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 
@@ -112,6 +125,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 }
 
+// Layout accepts outside window dimensions and returns te game's logical
+// screen dimensions.
 func (g *Game) Layout(outsideWidth int, outsideHeight int) (screenWidth int, screenHeight int) {
 	screenWidth = g.viewportCols * g.tileWidth
 	screenHeight = g.viewportRows * g.tileHeight
@@ -119,7 +134,13 @@ func (g *Game) Layout(outsideWidth int, outsideHeight int) (screenWidth int, scr
 	return screenWidth, screenHeight
 }
 
-func loadTileset(charWidth, charHeight int) (SpriteSheet, error) {
+// loadtileset a SpriteSheet from the embeded filesystem. In the
+// default SpriteSheet, "dejavu10x10_gs_tc.png", there is no transparency
+// and the sprites are on a black background. Black is changed to transparent
+// So that coloring can be applied on tiles. Currently, it is only creating
+// two sprites, the '@' character for the player and a blank space which is
+// used for floors and walls (with different colorings on them).
+func loadTileset(tileWidth, tileHeight int) (SpriteSheet, error) {
 	tileset := make(map[string]*ebiten.Image)
 	spriteSheetFile, err := assets.AssetsFS.ReadFile("dejavu10x10_gs_tc.png")
 	if err != nil {
@@ -143,11 +164,11 @@ func loadTileset(charWidth, charHeight int) (SpriteSheet, error) {
 		}
 	}
 
-	rect := image.Rect(0*charWidth, 1*charHeight, 0*charWidth+charWidth, 1*charHeight+charHeight)
+	rect := image.Rect(0*tileWidth, 1*tileHeight, 0*tileWidth+tileWidth, 1*tileHeight+tileHeight)
 	imageTile := ebiten.NewImageFromImage(transparentImg)
 	tileset["@"] = imageTile.SubImage(rect).(*ebiten.Image)
 
-	rect = image.Rect(0*charWidth, 0*charHeight, 0*charWidth+charWidth, 0*charHeight+charHeight)
+	rect = image.Rect(0*tileWidth, 0*tileHeight, 0*tileWidth+tileWidth, 0*tileHeight+tileHeight)
 	imageTile = ebiten.NewImageFromImage(transparentImg)
 	tileset[" "] = imageTile.SubImage(rect).(*ebiten.Image)
 	return tileset, nil
