@@ -2,6 +2,8 @@ package engine
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"image"
 	"image/color"
 	_ "image/png"
@@ -23,6 +25,7 @@ type Game struct {
 	entities                   []*Entity
 	spriteSheet                SpriteSheet
 	gameMap                    *GameMap
+	input                      Input
 	whitePixel                 *ebiten.Image
 }
 
@@ -35,6 +38,7 @@ func NewGame(
 	tileWidth, tileHeight int,
 	player *Entity,
 	npcs []*Entity,
+	input Input,
 ) (*Game, error) {
 	tileset, err := loadTileset(tileWidth, tileHeight)
 	if err != nil {
@@ -51,6 +55,7 @@ func NewGame(
 		entities:     append([]*Entity{player}, npcs...),
 		spriteSheet:  tileset,
 		gameMap:      NewGameMap(viewportCols, viewportRows),
+		input:        input,
 		whitePixel:   whitePixel,
 	}
 	return game, nil
@@ -68,18 +73,17 @@ type SpriteSheet map[string]*ebiten.Image
 // checks if the move is legal, and if so calls the player's Move
 // method.
 func (g *Game) Update() error {
-	action := g.EventHandler()
+	action := g.player.Behavior.GetAction(g, g.player)
 	if action == nil {
 		return nil
 	}
-	switch v := action.(type) {
+	switch a := action.(type) {
 	case *MovementAction:
-		legalMove := g.gameMap.InBounds(g.player.x+v.dx, g.player.y+v.dy) &&
-			g.gameMap.tiles[g.gameMap.GetIndex(g.player.x+v.dx, g.player.y+v.dy)].walkable
-		if legalMove {
-			g.player.Move(v.dx, v.dy)
-		}
+		fmt.Print("Update got MovementAction\n")
+		a.Perform(g, g.player)
 	case *EscapeAction:
+		fmt.Print("Update got EscapeAction\n")
+		a.Perform(g, nil)
 		return ebiten.Termination
 	default:
 	}
@@ -97,7 +101,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	for y := 0; y < g.viewportRows; y++ {
 		for x := 0; x < g.viewportCols; x++ {
-			tile := g.gameMap.tiles[g.gameMap.GetIndex(x, y)]
+			tile := g.gameMap.tiles[g.gameMap.GetIndex(Point{x, y})]
 			visual := tile.darkGraphic
 
 			op.GeoM.Reset()
@@ -118,10 +122,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	for _, entity := range g.entities {
 		op.GeoM.Reset()
 		//op.GeoM.Scale(float64(g.charWidth), float64(g.charHeight))
-		op.GeoM.Translate(float64(entity.x*g.tileWidth), float64(entity.y*g.tileHeight))
+		op.GeoM.Translate(float64(entity.Loc.X*g.tileWidth), float64(entity.Loc.Y*g.tileHeight))
 		op.ColorScale.Reset()
-		op.ColorScale.Scale(float32(entity.color.R)/255.0, float32(entity.color.G)/255.0, float32(entity.color.B)/255.0, 1)
-		screen.DrawImage(g.spriteSheet["@"], op)
+		op.ColorScale.Scale(float32(entity.Color.R)/255.0, float32(entity.Color.G)/255.0, float32(entity.Color.B)/255.0, 1)
+		screen.DrawImage(g.spriteSheet[entity.SpriteName], op)
 	}
 }
 
@@ -172,4 +176,11 @@ func loadTileset(tileWidth, tileHeight int) (SpriteSheet, error) {
 	imageTile = ebiten.NewImageFromImage(transparentImg)
 	tileset[" "] = imageTile.SubImage(rect).(*ebiten.Image)
 	return tileset, nil
+}
+
+var ErrQuit = errors.New("player requested quit")
+
+type Input interface {
+	WantsToMove() (direction Vector)
+	WantsToQuit() bool
 }
