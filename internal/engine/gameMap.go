@@ -56,7 +56,7 @@ func (gm *GameMap) GetIndex(p Point) int {
 	return p.Y*gm.cols + p.X
 }
 
-// InBouds tests if a [Point] is inside of the [GameMap].
+// InBounds tests if a [Point] is inside of the [GameMap].
 func (gm *GameMap) InBounds(p Point) bool {
 	return 0 <= p.X && p.X < gm.cols && 0 <= p.Y && p.Y < gm.rows
 }
@@ -96,13 +96,14 @@ func (gm *GameMap) GetTileAt(p Point) Tile {
 var floor = &Tile{Walkable: true,
 	Transparent: true,
 	DarkGraphic: &Graphic{Name: " ",
-		FG: color.NRGBA{R: 255, G: 255, B: 255, A: 255},
-		BG: color.NRGBA{R: 50, G: 50, B: 150, A: 255}}}
+		FG: color.NRGBA{R: 0, G: 0, B: 0, A: 0},
+		BG: color.NRGBA{R: 50, G: 50, B: 150, A: 255},
+	}}
 
 // Wall is a dummy to let us set some walls to verify we can't walk through
 // a non-walkable tile.
 var wall = &Tile{Walkable: false,
 	Transparent: false,
 	DarkGraphic: &Graphic{Name: " ",
-		FG: color.NRGBA{R: 255, G: 255, B: 255, A: 255},
+		FG: color.NRGBA{R: 0, G: 0, B: 0, A: 0},
 		BG: color.NRGBA{R: 0, G: 0, B: 100, A: 255}}}

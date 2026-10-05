@@ -1,24 +1,19 @@
 package engine
 
-import (
-	"image/color"
-)
-
 // Entity is the base structure for all entities in the game. They have a
-// location, name, sprite name, color, and a [Behavior]. Currently, we only
-// have two kinds of entities, the player and the npc and the npc isn't really
-// different from a player, other than we don't read any input for it.
+// [Point] for location, a name, a [Graphic], and a [Behavior]. Currently, we
+// only have two kinds of entities, the player and the npc and the npc isn't
+// really different from a player, other than we don't read any input for it.
 // Eventually there will be more complicated structures as we have more types
-// of entities. The [Behavior] is the interface geting an entity's intended
+// of entities. The [Behavior] is the interface getting an entity's intended
 // [Action]. This will allow entities to have rules for what to do, for
 // example a trap can blow up because it was stepped on or a monster
 // can decide to chase the player or give up the chase.
 type Entity struct {
-	Loc        Point
-	Name       string
-	SpriteName string
-	Color      color.NRGBA
-	Behavior   Behavior
+	Loc      Point
+	Name     string
+	Graphic  Graphic
+	Behavior Behavior
 }
 
 // Move updates the [Entity]'s location with the supplied [Vector].

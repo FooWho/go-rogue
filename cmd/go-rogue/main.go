@@ -58,20 +58,34 @@ const (
 
 func main() {
 	input := &EbitenInput{}
-	renderer, err := renderer.NewRenderer("dejavu10x10_gs_tc.png", tileWidth, tileHeight, gameCols, gameRows)
+	renderer, err :=
+		renderer.NewRenderer("dejavu10x10_gs_tc_transparent.png",
+			tileWidth,
+			tileHeight,
+			gameCols,
+			gameRows,
+		)
 	if err != nil {
 		log.Fatal(err)
 	}
 	player := &engine.Entity{Loc: engine.Point{X: playerX, Y: playerY},
-		Name:       "player",
-		SpriteName: "@",
-		Color:      color.NRGBA{R: 255, G: 255, B: 255, A: 255},
-		Behavior:   &engine.PlayerControl{}}
+		Name: "player",
+		Graphic: engine.Graphic{
+			Name: "@",
+			FG:   color.NRGBA{R: 255, G: 255, B: 255, A: 255},
+			BG:   color.NRGBA{R: 0, G: 0, B: 0, A: 0},
+		},
+		Behavior: &engine.PlayerControl{},
+	}
 	npc := &engine.Entity{Loc: engine.Point{X: gameCols/2 - 5, Y: gameRows / 2},
-		Name:       "monster",
-		SpriteName: "@",
-		Color:      color.NRGBA{R: 255, G: 255, B: 0, A: 255},
-		Behavior:   nil}
+		Name: "monster",
+		Graphic: engine.Graphic{
+			Name: "@",
+			FG:   color.NRGBA{R: 255, G: 255, B: 0, A: 255},
+			BG:   color.NRGBA{R: 0, G: 0, B: 0, A: 0},
+		},
+		Behavior: nil,
+	}
 	npcs := append(([]*engine.Entity)(nil), npc)
 	game, err := engine.NewGame(gameCols,
 		gameRows,
