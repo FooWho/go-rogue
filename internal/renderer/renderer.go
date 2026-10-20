@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	_ "image/png"
+	"math"
 
 	"github.com/FooWho/go-rogue/assets"
 	"github.com/FooWho/go-rogue/internal/engine"
@@ -21,6 +22,7 @@ type SpriteSheet map[string]*ebiten.Image
 // whitePixel field is used to tint sprites and is held here just so it
 // doesn't need to be recreated constantly.
 type Renderer struct {
+	name                       string
 	spriteSheet                SpriteSheet
 	whitePixel                 *ebiten.Image
 	tileWidth, tileHeight      int
@@ -35,22 +37,21 @@ type Renderer struct {
 // window need to match in size. This will eventually be changed to allow for
 // arbitrary map sizes with the window acting as a viewport onto the map.
 func NewRenderer(
-	spriteSheetName string,
-	tileWidth, tileHeight int,
+	assetConfiguration AssetConfiguration,
 	viewportCols, viewportRows int,
 ) (*Renderer, error) {
-	spriteSheet, err := loadTileset(spriteSheetName, tileWidth, tileHeight)
+	spriteSheet, err := loadTileset(assetConfiguration)
 	if err != nil {
 		return nil, err
 	}
-	ebiten.SetWindowSize(viewportCols*tileWidth, viewportRows*tileHeight)
+	ebiten.SetWindowSize(1280, 800)
 	ebiten.SetWindowTitle("Go Rogue!")
 	whitePixel := ebiten.NewImage(1, 1)
 	whitePixel.Fill(color.White)
 	return &Renderer{spriteSheet: spriteSheet,
 			whitePixel:   whitePixel,
-			tileWidth:    tileWidth,
-			tileHeight:   tileHeight,
+			tileWidth:    assetConfiguration.TileWidth,
+			tileHeight:   assetConfiguration.TileHeight,
 			viewportCols: viewportCols,
 			viewportRows: viewportRows,
 		},
@@ -63,7 +64,9 @@ func NewRenderer(
 // background. The process is then repeated for each [engine.Entity].
 func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 	opFG := &ebiten.DrawImageOptions{}
+	opFG.Filter = ebiten.FilterPixelated
 	opBG := &ebiten.DrawImageOptions{}
+	opBG.Filter = ebiten.FilterPixelated
 
 	for y := 0; y < r.viewportRows; y++ {
 		for x := 0; x < r.viewportCols; x++ {
@@ -93,6 +96,9 @@ func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 			tile := gameEngine.Map().GetTileAt(engine.Point{X: x, Y: y})
 			visual := tile.DarkGraphic
 			opFG.GeoM.Reset()
+			opFG.GeoM.Translate(-float64(r.tileWidth)/2, -float64(r.tileHeight)/2)
+			opFG.GeoM.Rotate(math.Pi)
+			opFG.GeoM.Translate(float64(r.tileWidth)/2, float64(r.tileHeight)/2)
 			opFG.GeoM.Translate(
 				float64(x*r.tileWidth),
 				float64(y*r.tileHeight),
@@ -130,6 +136,9 @@ func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 	for _, entity := range gameEngine.Entities() {
 		visual := entity.Graphic
 		opFG.GeoM.Reset()
+		opFG.GeoM.Translate(-float64(r.tileWidth)/2, -float64(r.tileHeight)/2)
+		opFG.GeoM.Rotate(math.Pi)
+		opFG.GeoM.Translate(float64(r.tileWidth)/2, float64(r.tileHeight)/2)
 		opFG.GeoM.Translate(float64(entity.Loc.X*r.tileWidth),
 			float64(entity.Loc.Y*r.tileHeight))
 		opFG.ColorScale.Reset()
@@ -162,12 +171,11 @@ func (r *Renderer) Layout(
 // The "dejavu10x10_gs_tc_transparent.png" graphic adds transparency. This
 // allows background colors to be set appropriately.
 // Currently we are only creating three sprites: '@', ' ', and '#'.
-func loadTileset(
-	spriteSheetName string,
-	tileWidth, tileHeight int,
-) (SpriteSheet, error) {
+func loadTileset(assetConfiguration AssetConfiguration) (SpriteSheet, error) {
 	tileset := make(map[string]*ebiten.Image)
-	spriteSheetFile, err := assets.AssetsFS.ReadFile(spriteSheetName)
+	spriteSheetFile, err := assets.AssetsFS.ReadFile(
+		assetConfiguration.FileName,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -179,27 +187,45 @@ func loadTileset(
 	baseImage := ebiten.NewImageFromImage(img)
 
 	rect := image.Rect(
-		0*tileWidth,
-		1*tileHeight,
-		0*tileWidth+tileWidth,
-		1*tileHeight+tileHeight,
+		assetConfiguration.AssetTilesMap["player"].X*assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["player"].Y*assetConfiguration.TileHeight,
+		assetConfiguration.AssetTilesMap["player"].X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["player"].Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
 	)
-	tileset["@"] = baseImage.SubImage(rect).(*ebiten.Image)
+	tileset["player"] = baseImage.SubImage(rect).(*ebiten.Image)
 
 	rect = image.Rect(
-		0*tileWidth,
-		0*tileHeight,
-		0*tileWidth+tileWidth,
-		0*tileHeight+tileHeight,
+		assetConfiguration.AssetTilesMap["wall"].X*assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["wall"].Y*assetConfiguration.TileHeight,
+		assetConfiguration.AssetTilesMap["wall"].X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["wall"].Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
 	)
-	tileset[" "] = baseImage.SubImage(rect).(*ebiten.Image)
+	tileset["wall"] = baseImage.SubImage(rect).(*ebiten.Image)
 
 	rect = image.Rect(
-		3*tileWidth,
-		0*tileHeight,
-		3*tileWidth+tileWidth,
-		0*tileHeight+tileHeight,
+		assetConfiguration.AssetTilesMap["floor"].X*assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["floor"].Y*assetConfiguration.TileHeight,
+		assetConfiguration.AssetTilesMap["floor"].X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["floor"].Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
 	)
-	tileset["#"] = baseImage.SubImage(rect).(*ebiten.Image)
+	tileset["floor"] = baseImage.SubImage(rect).(*ebiten.Image)
+
+	rect = image.Rect(
+		assetConfiguration.AssetTilesMap["monster"].X*assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["monster"].Y*assetConfiguration.TileHeight,
+		assetConfiguration.AssetTilesMap["monster"].X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["monster"].Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
+	)
+	tileset["monster"] = baseImage.SubImage(rect).(*ebiten.Image)
+
 	return tileset, nil
+}
+
+type AssetConfigurationSet map[string]AssetConfiguration
+
+type AssetConfiguration struct {
+	FileName      string                  `json:"file"`
+	TileWidth     int                     `json:"tileWidth"`
+	TileHeight    int                     `json:"tileHeight"`
+	AssetTilesMap map[string]engine.Point `json:"sprites"`
 }

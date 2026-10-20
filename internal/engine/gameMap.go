@@ -1,17 +1,6 @@
 package engine
 
-import (
-	"image/color"
-)
-
-// Graphic is the visual representation of a tile. Name refers to the sprite
-// name for accessing the sprite from the SpriteSheet. FG and BG are the
-// foreground and background colors.
-type Graphic struct {
-	Name string
-	FG   color.NRGBA
-	BG   color.NRGBA
-}
+import "image/color"
 
 // Tile is the representation used by the [GameMap]. A Tile can be walkable,
 // transparent, and has a graphical representation. Currently we only have a
@@ -95,8 +84,8 @@ func (gm *GameMap) GetTileAt(p Point) Tile {
 // Floor is a dummy to give us something to fill the map with.
 var floor = &Tile{Walkable: true,
 	Transparent: true,
-	DarkGraphic: &Graphic{Name: " ",
-		FG: color.NRGBA{R: 0, G: 0, B: 0, A: 0},
+	DarkGraphic: &Graphic{Name: "floor",
+		FG: color.NRGBA{R: 50, G: 0, B: 50, A: 255},
 		BG: color.NRGBA{R: 50, G: 50, B: 150, A: 255},
 	}}
 
@@ -104,6 +93,6 @@ var floor = &Tile{Walkable: true,
 // a non-walkable tile.
 var wall = &Tile{Walkable: false,
 	Transparent: false,
-	DarkGraphic: &Graphic{Name: " ",
-		FG: color.NRGBA{R: 0, G: 0, B: 0, A: 0},
-		BG: color.NRGBA{R: 0, G: 0, B: 100, A: 255}}}
+	DarkGraphic: &Graphic{Name: "wall",
+		FG: color.NRGBA{R: 0, G: 0, B: 0, A: 255},
+		BG: color.NRGBA{R: 150, G: 50, B: 150, A: 255}}}
