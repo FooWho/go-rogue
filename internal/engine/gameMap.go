@@ -1,7 +1,5 @@
 package engine
 
-import "image/color"
-
 // Tile is the representation used by the [GameMap]. A Tile can be walkable,
 // transparent, and has a graphical representation. Currently we only have a
 // DarkGraphic, because that is where we are at in the tutorial. Eventually we
@@ -9,7 +7,7 @@ import "image/color"
 type Tile struct {
 	Walkable    bool
 	Transparent bool
-	DarkGraphic *Graphic
+	SpriteName  string
 }
 
 // GameMap is a cols*rows slice of [Tile] structs.  They are stored in one
@@ -82,17 +80,16 @@ func (gm *GameMap) GetTileAt(p Point) Tile {
 }
 
 // Floor is a dummy to give us something to fill the map with.
-var floor = &Tile{Walkable: true,
+var floor = &Tile{
+	Walkable:    true,
 	Transparent: true,
-	DarkGraphic: &Graphic{Name: "floor",
-		FG: color.NRGBA{R: 50, G: 0, B: 50, A: 255},
-		BG: color.NRGBA{R: 50, G: 50, B: 150, A: 255},
-	}}
+	SpriteName:  "floor",
+}
 
 // Wall is a dummy to let us set some walls to verify we can't walk through
 // a non-walkable tile.
-var wall = &Tile{Walkable: false,
+var wall = &Tile{
+	Walkable:    false,
 	Transparent: false,
-	DarkGraphic: &Graphic{Name: "wall",
-		FG: color.NRGBA{R: 0, G: 0, B: 0, A: 255},
-		BG: color.NRGBA{R: 150, G: 50, B: 150, A: 255}}}
+	SpriteName:  "wall_horiz",
+}

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"image/color"
 	"log"
 
 	"github.com/FooWho/go-rogue/assets"
@@ -93,22 +92,14 @@ func main() {
 		log.Fatal(err)
 	}
 	player := &engine.Entity{Loc: engine.Point{X: playerX, Y: playerY},
-		Name: "player",
-		Graphic: engine.Graphic{
-			Name: "player",
-			FG:   color.NRGBA{R: 255, G: 255, B: 255, A: 255},
-			BG:   color.NRGBA{R: 0, G: 0, B: 0, A: 0},
-		},
-		Behavior: &engine.PlayerControl{},
+		Name:       "player",
+		SpriteName: "player",
+		Behavior:   &engine.PlayerControl{},
 	}
 	npc := &engine.Entity{Loc: engine.Point{X: gameCols/2 - 5, Y: gameRows / 2},
-		Name: "monster",
-		Graphic: engine.Graphic{
-			Name: "monster",
-			FG:   color.NRGBA{R: 255, G: 255, B: 0, A: 255},
-			BG:   color.NRGBA{R: 0, G: 0, B: 0, A: 0},
-		},
-		Behavior: nil,
+		Name:       "monster",
+		SpriteName: "monster",
+		Behavior:   nil,
 	}
 	npcs := append(([]*engine.Entity)(nil), npc)
 	game, err := engine.NewGame(gameCols,
