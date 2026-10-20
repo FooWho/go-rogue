@@ -5,7 +5,6 @@ import (
 	"image"
 	"image/color"
 	_ "image/png"
-	"math"
 
 	"github.com/FooWho/go-rogue/assets"
 	"github.com/FooWho/go-rogue/internal/engine"
@@ -15,7 +14,7 @@ import (
 // SpriteSheet is a map of an asset name to an asset image. The images
 // are extracted from one large sprite sheet during the construction of the
 // [Renderer].
-type SpriteSheet map[string]*ebiten.Image
+type SpriteSheet map[string]*Sprite
 
 // Renderer contains the data needed to draw the screen when the game state
 // updates. The [SpriteSheet] is loaded via the [NewRenderer] function. The
@@ -71,9 +70,9 @@ func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 	for y := 0; y < r.viewportRows; y++ {
 		for x := 0; x < r.viewportCols; x++ {
 			tile := gameEngine.Map().GetTileAt(engine.Point{X: x, Y: y})
-			visual := tile.DarkGraphic
+			visual := r.spriteSheet[tile.SpriteName]
 
-			if visual.BG.A > 0 {
+			if visual.ColorBG.A > 0 {
 				opBG.GeoM.Reset()
 				opBG.GeoM.Scale(float64(r.tileWidth), float64(r.tileHeight))
 				opBG.GeoM.Translate(
@@ -82,10 +81,10 @@ func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 				)
 				opBG.ColorScale.Reset()
 				opBG.ColorScale.Scale(
-					float32(visual.BG.R)/255.0,
-					float32(visual.BG.G)/255.0,
-					float32(visual.BG.B)/255.0,
-					float32(visual.BG.A)/255.0,
+					float32(visual.ColorBG.R)/255.0,
+					float32(visual.ColorBG.G)/255.0,
+					float32(visual.ColorBG.B)/255.0,
+					float32(visual.ColorBG.A)/255.0,
 				)
 				screen.DrawImage(r.whitePixel, opBG)
 			}
@@ -94,61 +93,61 @@ func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 	for y := 0; y < r.viewportRows; y++ {
 		for x := 0; x < r.viewportCols; x++ {
 			tile := gameEngine.Map().GetTileAt(engine.Point{X: x, Y: y})
-			visual := tile.DarkGraphic
+			visual := r.spriteSheet[tile.SpriteName]
 			opFG.GeoM.Reset()
-			opFG.GeoM.Translate(-float64(r.tileWidth)/2, -float64(r.tileHeight)/2)
-			opFG.GeoM.Rotate(math.Pi)
-			opFG.GeoM.Translate(float64(r.tileWidth)/2, float64(r.tileHeight)/2)
+			//opFG.GeoM.Translate(-float64(r.tileWidth)/2, -float64(r.tileHeight)/2)
+			//opFG.GeoM.Rotate(math.Pi)
+			//opFG.GeoM.Translate(float64(r.tileWidth)/2, float64(r.tileHeight)/2)
 			opFG.GeoM.Translate(
 				float64(x*r.tileWidth),
 				float64(y*r.tileHeight),
 			)
 			opFG.ColorScale.Reset()
 			opFG.ColorScale.Scale(
-				float32(visual.FG.R)/255.0,
-				float32(visual.FG.G)/255.0,
-				float32(visual.FG.B)/255.0,
-				float32(visual.FG.A)/255.0,
+				float32(visual.ColorFG.R)/255.0,
+				float32(visual.ColorFG.G)/255.0,
+				float32(visual.ColorFG.B)/255.0,
+				float32(visual.ColorFG.A)/255.0,
 			)
-			screen.DrawImage(r.spriteSheet[visual.Name], opFG)
+			screen.DrawImage(visual.Img, opFG)
 		}
 	}
 
 	for _, entity := range gameEngine.Entities() {
-		visual := entity.Graphic
+		visual := r.spriteSheet[entity.SpriteName]
 
-		if visual.BG.A > 0 {
+		if visual.ColorBG.A > 0 {
 			opBG.GeoM.Reset()
 			opBG.GeoM.Scale(float64(r.tileWidth), float64(r.tileHeight))
 			opBG.GeoM.Translate(float64(entity.Loc.X*r.tileWidth),
 				float64(entity.Loc.Y*r.tileHeight))
 			opBG.ColorScale.Reset()
 			opBG.ColorScale.Scale(
-				float32(visual.BG.R)/255.0,
-				float32(visual.BG.G)/255.0,
-				float32(visual.BG.B)/255.0,
-				float32(visual.BG.A)/255.0,
+				float32(visual.ColorBG.R)/255.0,
+				float32(visual.ColorBG.G)/255.0,
+				float32(visual.ColorBG.B)/255.0,
+				float32(visual.ColorBG.A)/255.0,
 			)
 			screen.DrawImage(r.whitePixel, opBG)
 		}
 	}
 
 	for _, entity := range gameEngine.Entities() {
-		visual := entity.Graphic
+		visual := r.spriteSheet[entity.SpriteName]
 		opFG.GeoM.Reset()
-		opFG.GeoM.Translate(-float64(r.tileWidth)/2, -float64(r.tileHeight)/2)
-		opFG.GeoM.Rotate(math.Pi)
-		opFG.GeoM.Translate(float64(r.tileWidth)/2, float64(r.tileHeight)/2)
+		//opFG.GeoM.Translate(-float64(r.tileWidth)/2, -float64(r.tileHeight)/2)
+		//opFG.GeoM.Rotate(math.Pi)
+		//opFG.GeoM.Translate(float64(r.tileWidth)/2, float64(r.tileHeight)/2)
 		opFG.GeoM.Translate(float64(entity.Loc.X*r.tileWidth),
 			float64(entity.Loc.Y*r.tileHeight))
 		opFG.ColorScale.Reset()
 		opFG.ColorScale.Scale(
-			float32(visual.FG.R)/255.0,
-			float32(visual.FG.G)/255.0,
-			float32(visual.FG.B)/255.0,
-			float32(visual.FG.A)/255.0,
+			float32(visual.ColorFG.R)/255.0,
+			float32(visual.ColorFG.G)/255.0,
+			float32(visual.ColorFG.B)/255.0,
+			float32(visual.ColorFG.A)/255.0,
 		)
-		screen.DrawImage(r.spriteSheet[visual.Name], opFG)
+		screen.DrawImage(visual.Img, opFG)
 	}
 }
 
@@ -172,7 +171,7 @@ func (r *Renderer) Layout(
 // allows background colors to be set appropriately.
 // Currently we are only creating three sprites: '@', ' ', and '#'.
 func loadTileset(assetConfiguration AssetConfiguration) (SpriteSheet, error) {
-	tileset := make(map[string]*ebiten.Image)
+	tileset := make(map[string]*Sprite)
 	spriteSheetFile, err := assets.AssetsFS.ReadFile(
 		assetConfiguration.FileName,
 	)
@@ -186,37 +185,45 @@ func loadTileset(assetConfiguration AssetConfiguration) (SpriteSheet, error) {
 
 	baseImage := ebiten.NewImageFromImage(img)
 
+	tmpSprite := assetConfiguration.AssetTilesMap["player"]
+	tileset["player"] = &tmpSprite
 	rect := image.Rect(
-		assetConfiguration.AssetTilesMap["player"].X*assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["player"].Y*assetConfiguration.TileHeight,
-		assetConfiguration.AssetTilesMap["player"].X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["player"].Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
+		assetConfiguration.AssetTilesMap["player"].ImageLoc.X*assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["player"].ImageLoc.Y*assetConfiguration.TileHeight,
+		assetConfiguration.AssetTilesMap["player"].ImageLoc.X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["player"].ImageLoc.Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
 	)
-	tileset["player"] = baseImage.SubImage(rect).(*ebiten.Image)
+	tileset["player"].Img = baseImage.SubImage(rect).(*ebiten.Image)
 
+	tmpSprite = assetConfiguration.AssetTilesMap["wall_horiz"]
+	tileset["wall_horiz"] = &tmpSprite
 	rect = image.Rect(
-		assetConfiguration.AssetTilesMap["wall"].X*assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["wall"].Y*assetConfiguration.TileHeight,
-		assetConfiguration.AssetTilesMap["wall"].X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["wall"].Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
+		assetConfiguration.AssetTilesMap["wall_horiz"].ImageLoc.X*assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["wall_horiz"].ImageLoc.Y*assetConfiguration.TileHeight,
+		assetConfiguration.AssetTilesMap["wall_horiz"].ImageLoc.X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["wall_horiz"].ImageLoc.Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
 	)
-	tileset["wall"] = baseImage.SubImage(rect).(*ebiten.Image)
+	tileset["wall_horiz"].Img = baseImage.SubImage(rect).(*ebiten.Image)
 
+	tmpSprite = assetConfiguration.AssetTilesMap["floor"]
+	tileset["floor"] = &tmpSprite
 	rect = image.Rect(
-		assetConfiguration.AssetTilesMap["floor"].X*assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["floor"].Y*assetConfiguration.TileHeight,
-		assetConfiguration.AssetTilesMap["floor"].X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["floor"].Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
+		assetConfiguration.AssetTilesMap["floor"].ImageLoc.X*assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["floor"].ImageLoc.Y*assetConfiguration.TileHeight,
+		assetConfiguration.AssetTilesMap["floor"].ImageLoc.X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["floor"].ImageLoc.Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
 	)
-	tileset["floor"] = baseImage.SubImage(rect).(*ebiten.Image)
+	tileset["floor"].Img = baseImage.SubImage(rect).(*ebiten.Image)
 
+	tmpSprite = assetConfiguration.AssetTilesMap["monster"]
+	tileset["monster"] = &tmpSprite
 	rect = image.Rect(
-		assetConfiguration.AssetTilesMap["monster"].X*assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["monster"].Y*assetConfiguration.TileHeight,
-		assetConfiguration.AssetTilesMap["monster"].X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["monster"].Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
+		assetConfiguration.AssetTilesMap["monster"].ImageLoc.X*assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["monster"].ImageLoc.Y*assetConfiguration.TileHeight,
+		assetConfiguration.AssetTilesMap["monster"].ImageLoc.X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
+		assetConfiguration.AssetTilesMap["monster"].ImageLoc.Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
 	)
-	tileset["monster"] = baseImage.SubImage(rect).(*ebiten.Image)
+	tileset["monster"].Img = baseImage.SubImage(rect).(*ebiten.Image)
 
 	return tileset, nil
 }
@@ -224,8 +231,18 @@ func loadTileset(assetConfiguration AssetConfiguration) (SpriteSheet, error) {
 type AssetConfigurationSet map[string]AssetConfiguration
 
 type AssetConfiguration struct {
-	FileName      string                  `json:"file"`
-	TileWidth     int                     `json:"tileWidth"`
-	TileHeight    int                     `json:"tileHeight"`
-	AssetTilesMap map[string]engine.Point `json:"sprites"`
+	FileName      string            `json:"file"`
+	TileWidth     int               `json:"tileWidth"`
+	TileHeight    int               `json:"tileHeight"`
+	AssetTilesMap map[string]Sprite `json:"sprites"`
+}
+
+type Sprite struct {
+	ImageLoc engine.Point `json:"imageLoc"`
+	ColorFG  color.NRGBA  `json:"colorFG"`
+	ColorBG  color.NRGBA  `json:"colorBG"`
+	FlippedX bool         `json:"flippedX"`
+	FlippedY bool         `json:"flippedY"`
+	Rotation float64      `json:"rotation"`
+	Img      *ebiten.Image
 }
