@@ -10,10 +10,10 @@ package engine
 // example a trap can blow up because it was stepped on or a monster
 // can decide to chase the player or give up the chase.
 type Entity struct {
-	Loc      Point
-	Name     string
-	Graphic  Graphic
-	Behavior Behavior
+	Loc        Point
+	Name       string
+	SpriteName string
+	Behavior   Behavior
 }
 
 // Move updates the [Entity]'s location with the supplied [Vector].
