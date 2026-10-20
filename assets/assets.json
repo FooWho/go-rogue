@@ -1,0 +1,52 @@
+{
+    "graphic": {
+        "file": "monochrome-transparent_packed.png",
+        "tileWidth": 16,
+        "tileHeight": 16,
+        "sprites": {
+            "player": {
+                "spriteLoc": {"x": 25, "y": 0},
+                "colorFG": {"R": 255, "G": 255, "B": 255, "A": 255},
+                "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "monster": {
+                "spriteLoc": {"x": 28, "y": 6},
+                "colorFG": {"R": 255, "G": 255, "B": 0, "A": 255},
+                "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "wall": {
+                "spriteLoc": {"x": 19, "y": 0},
+                "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
+                "colorBG": {"R": 150, "G": 50, "B": 150, "A": 255},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "floor": {
+                "spriteLoc": {"x": 0, "y": 0},
+                "colorFG": {"R": 50, "G": 0, "B": 50, "A": 255},
+                "colorBG": {"R": 50, "G": 50, "B": 150, "A": 255},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            }
+        } 
+    },
+    "ascii": {
+        "file": "dejavu10x10_gs_tc_transparent.png",
+        "tileWidth": 10,
+        "tileHeight": 10,
+        "sprites": {
+            "player": {"x": 0, "y": 1},
+            "monster": {"x": 6, "y": 4},
+            "wall": {"x": 0, "y": 0},
+            "floor": {"x": 0, "y": 0}
+        }
+    }
+}

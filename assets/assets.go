@@ -4,5 +4,5 @@ import (
 	"embed"
 )
 
-//go:embed *.png
+//go:embed *.png *.json
 var AssetsFS embed.FS

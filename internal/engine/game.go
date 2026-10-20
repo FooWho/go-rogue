@@ -3,6 +3,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"image/color"
 )
 
 // Game represents the game state. It holds a reference to the player and a
@@ -105,4 +106,13 @@ type ImpossibleActionError struct {
 // Error is used to obtain the reason the [Action] was not allowed.
 func (e *ImpossibleActionError) Error() string {
 	return e.Reason
+}
+
+// Graphic is the visual representation of a tile. Name refers to the sprite
+// name for accessing the sprite from the SpriteSheet. FG and BG are the
+// foreground and background colors.
+type Graphic struct {
+	Name string
+	FG   color.NRGBA
+	BG   color.NRGBA
 }
