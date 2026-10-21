@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	_ "image/png"
+	"math"
 
 	"github.com/FooWho/go-rogue/assets"
 	"github.com/FooWho/go-rogue/internal/engine"
@@ -95,9 +96,12 @@ func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 			tile := gameEngine.Map().GetTileAt(engine.Point{X: x, Y: y})
 			visual := r.spriteSheet[tile.SpriteName]
 			opFG.GeoM.Reset()
-			//opFG.GeoM.Translate(-float64(r.tileWidth)/2, -float64(r.tileHeight)/2)
-			//opFG.GeoM.Rotate(math.Pi)
-			//opFG.GeoM.Translate(float64(r.tileWidth)/2, float64(r.tileHeight)/2)
+			if visual.Rotation != float64(0) {
+				opFG.GeoM.Translate(-float64(r.tileWidth)/2, -float64(r.tileHeight)/2)
+				opFG.GeoM.Rotate(math.Pi * visual.Rotation)
+				opFG.GeoM.Translate(float64(r.tileWidth)/2, float64(r.tileHeight)/2)
+			}
+
 			opFG.GeoM.Translate(
 				float64(x*r.tileWidth),
 				float64(y*r.tileHeight),
@@ -135,9 +139,12 @@ func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 	for _, entity := range gameEngine.Entities() {
 		visual := r.spriteSheet[entity.SpriteName]
 		opFG.GeoM.Reset()
-		//opFG.GeoM.Translate(-float64(r.tileWidth)/2, -float64(r.tileHeight)/2)
-		//opFG.GeoM.Rotate(math.Pi)
-		//opFG.GeoM.Translate(float64(r.tileWidth)/2, float64(r.tileHeight)/2)
+		if visual.Rotation != float64(0) {
+			opFG.GeoM.Translate(-float64(r.tileWidth)/2, -float64(r.tileHeight)/2)
+			opFG.GeoM.Rotate(math.Pi * visual.Rotation)
+			opFG.GeoM.Translate(float64(r.tileWidth)/2, float64(r.tileHeight)/2)
+		}
+
 		opFG.GeoM.Translate(float64(entity.Loc.X*r.tileWidth),
 			float64(entity.Loc.Y*r.tileHeight))
 		opFG.ColorScale.Reset()
@@ -185,45 +192,17 @@ func loadTileset(assetConfiguration AssetConfiguration) (SpriteSheet, error) {
 
 	baseImage := ebiten.NewImageFromImage(img)
 
-	tmpSprite := assetConfiguration.AssetTilesMap["player"]
-	tileset["player"] = &tmpSprite
-	rect := image.Rect(
-		assetConfiguration.AssetTilesMap["player"].ImageLoc.X*assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["player"].ImageLoc.Y*assetConfiguration.TileHeight,
-		assetConfiguration.AssetTilesMap["player"].ImageLoc.X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["player"].ImageLoc.Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
-	)
-	tileset["player"].Img = baseImage.SubImage(rect).(*ebiten.Image)
-
-	tmpSprite = assetConfiguration.AssetTilesMap["wall_horiz"]
-	tileset["wall_horiz"] = &tmpSprite
-	rect = image.Rect(
-		assetConfiguration.AssetTilesMap["wall_horiz"].ImageLoc.X*assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["wall_horiz"].ImageLoc.Y*assetConfiguration.TileHeight,
-		assetConfiguration.AssetTilesMap["wall_horiz"].ImageLoc.X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["wall_horiz"].ImageLoc.Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
-	)
-	tileset["wall_horiz"].Img = baseImage.SubImage(rect).(*ebiten.Image)
-
-	tmpSprite = assetConfiguration.AssetTilesMap["floor"]
-	tileset["floor"] = &tmpSprite
-	rect = image.Rect(
-		assetConfiguration.AssetTilesMap["floor"].ImageLoc.X*assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["floor"].ImageLoc.Y*assetConfiguration.TileHeight,
-		assetConfiguration.AssetTilesMap["floor"].ImageLoc.X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["floor"].ImageLoc.Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
-	)
-	tileset["floor"].Img = baseImage.SubImage(rect).(*ebiten.Image)
-
-	tmpSprite = assetConfiguration.AssetTilesMap["monster"]
-	tileset["monster"] = &tmpSprite
-	rect = image.Rect(
-		assetConfiguration.AssetTilesMap["monster"].ImageLoc.X*assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["monster"].ImageLoc.Y*assetConfiguration.TileHeight,
-		assetConfiguration.AssetTilesMap["monster"].ImageLoc.X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
-		assetConfiguration.AssetTilesMap["monster"].ImageLoc.Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
-	)
-	tileset["monster"].Img = baseImage.SubImage(rect).(*ebiten.Image)
+	for k, v := range assetConfiguration.AssetTilesMap {
+		tmpSprite := v
+		tileset[k] = &tmpSprite
+		rect := image.Rect(
+			tileset[k].ImageLoc.X*assetConfiguration.TileWidth,
+			tileset[k].ImageLoc.Y*assetConfiguration.TileHeight,
+			tileset[k].ImageLoc.X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
+			tileset[k].ImageLoc.Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
+		)
+		tileset[k].Img = baseImage.SubImage(rect).(*ebiten.Image)
+	}
 
 	return tileset, nil
 }
