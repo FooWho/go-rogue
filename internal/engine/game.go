@@ -14,6 +14,16 @@ type Game struct {
 	entities []*Entity
 	gameMap  *GameMap
 	input    Input
+	config   ConfigurationFile
+}
+
+type ConfigurationFile struct {
+	Tileset       string `json:"tileset"`
+	RoomsMax      int    `json:"roomsMax"`
+	RoomWidthMin  int    `json:"roomWidthMin"`
+	RoomWidthMax  int    `json:"roomWidthMax"`
+	RoomHeightMin int    `json:"roomHeightMin"`
+	RoomHeightMax int    `json:"roomHeightMax"`
 }
 
 // NewGame creates and initializes a new [Game] struct. We currently only have
@@ -25,13 +35,15 @@ func NewGame(
 	player *Entity,
 	npcs []*Entity,
 	input Input,
+	config ConfigurationFile,
 ) (*Game, error) {
 
 	game := &Game{
 		player:   player,
 		entities: append([]*Entity{player}, npcs...),
-		gameMap:  NewGameMap(mapWidth, mapHeight),
+		gameMap:  NewGameMap(mapWidth, mapHeight, config),
 		input:    input,
+		config:   config,
 	}
 	return game, nil
 }

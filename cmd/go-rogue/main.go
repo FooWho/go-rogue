@@ -54,14 +54,12 @@ const (
 )
 
 func main() {
-	type ConfigurationFile struct {
-		Tileset string `json:"tileset"`
-	}
+
 	configurationFile, err := assets.AssetsFS.ReadFile("configuration.json")
 	if err != nil {
 		log.Fatal(err)
 	}
-	var config ConfigurationFile
+	var config engine.ConfigurationFile
 	err = json.Unmarshal(configurationFile, &config)
 	if err != nil {
 		log.Fatal(err)
@@ -87,7 +85,7 @@ func main() {
 		SpriteName: "player",
 		Behavior:   &engine.PlayerControl{},
 	}
-	npc := &engine.Entity{Loc: engine.Point{X: gameCols/2 - 5, Y: gameRows / 2},
+	npc := &engine.Entity{Loc: engine.Point{X: gameCols/2 - 7, Y: gameRows / 2},
 		Name:       "monster",
 		SpriteName: "monster",
 		Behavior:   nil,
@@ -97,7 +95,9 @@ func main() {
 		gameRows,
 		player,
 		npcs,
-		input)
+		input,
+		config,
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

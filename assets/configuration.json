@@ -1,3 +1,8 @@
 {
-    "tileset": "graphic"
+    "tileset": "ascii",
+    "roomsMax": 20,
+    "roomWidthMin": 5,
+    "roomWidthMax": 10,
+    "roomHeightMin": 5,
+    "roomHeightMax": 10
 }
