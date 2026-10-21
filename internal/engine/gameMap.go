@@ -21,12 +21,38 @@ type GameMap struct {
 // the map with "floor" tiles and then sets a few tiles to be a wall. This is
 // just to test that we can't walk outside of the map or through a wall.
 func NewGameMap(cols, rows int) *GameMap {
+	var floor = make([]*Tile, 5)
+	floor[0] = &Tile{
+		Walkable:    true,
+		Transparent: true,
+		SpriteName:  "floor1",
+	}
+	floor[1] = &Tile{
+		Walkable:    true,
+		Transparent: true,
+		SpriteName:  "floor2",
+	}
+	floor[2] = &Tile{
+		Walkable:    true,
+		Transparent: true,
+		SpriteName:  "floor3",
+	}
+	floor[3] = &Tile{
+		Walkable:    true,
+		Transparent: true,
+		SpriteName:  "floor4",
+	}
+	floor[4] = &Tile{
+		Walkable:    true,
+		Transparent: true,
+		SpriteName:  "floor5",
+	}
 	gm := &GameMap{cols: cols, rows: rows}
 	gm.tiles = make([]*Tile, cols*rows)
 
 	for y := 0; y < gm.rows; y++ {
 		for x := 0; x < gm.cols; x++ {
-			gm.tiles[gm.GetIndex(Point{x, y})] = floor
+			gm.tiles[gm.GetIndex(Point{x, y})] = floor[0]
 		}
 	}
 
@@ -77,13 +103,6 @@ func (gm *GameMap) Height() int {
 // [GameMap].
 func (gm *GameMap) GetTileAt(p Point) Tile {
 	return *gm.tiles[gm.GetIndex(p)]
-}
-
-// Floor is a dummy to give us something to fill the map with.
-var floor = &Tile{
-	Walkable:    true,
-	Transparent: true,
-	SpriteName:  "floor",
 }
 
 // Wall is a dummy to let us set some walls to verify we can't walk through
