@@ -15,51 +15,21 @@ type Tile struct {
 type GameMap struct {
 	cols, rows int
 	tiles      []*Tile
+	rooms      []RectangularRoom
 }
 
 // NewGameMap generates a map for us. It is currently a "dummy" map that fills
 // the map with "floor" tiles and then sets a few tiles to be a wall. This is
 // just to test that we can't walk outside of the map or through a wall.
-func NewGameMap(cols, rows int) *GameMap {
-	var floor = make([]*Tile, 5)
-	floor[0] = &Tile{
-		Walkable:    true,
-		Transparent: true,
-		SpriteName:  "floor1",
-	}
-	floor[1] = &Tile{
-		Walkable:    true,
-		Transparent: true,
-		SpriteName:  "floor2",
-	}
-	floor[2] = &Tile{
-		Walkable:    true,
-		Transparent: true,
-		SpriteName:  "floor3",
-	}
-	floor[3] = &Tile{
-		Walkable:    true,
-		Transparent: true,
-		SpriteName:  "floor4",
-	}
-	floor[4] = &Tile{
-		Walkable:    true,
-		Transparent: true,
-		SpriteName:  "floor5",
-	}
+func NewGameMap(cols, rows int, config ConfigurationFile) *GameMap {
 	gm := &GameMap{cols: cols, rows: rows}
 	gm.tiles = make([]*Tile, cols*rows)
-
-	for y := 0; y < gm.rows; y++ {
-		for x := 0; x < gm.cols; x++ {
-			gm.tiles[gm.GetIndex(Point{x, y})] = floor[0]
+	for y := range rows {
+		for x := range cols {
+			gm.tiles[gm.GetIndex(Point{X: x, Y: y})] = bedrock
 		}
 	}
-
-	gm.tiles[gm.GetIndex(Point{X: 30, Y: 22})] = wall
-	gm.tiles[gm.GetIndex(Point{X: 31, Y: 22})] = wall
-	gm.tiles[gm.GetIndex(Point{X: 32, Y: 22})] = wall
-
+	gm.GenerateDungeon(config)
 	return gm
 }
 
@@ -103,12 +73,4 @@ func (gm *GameMap) Height() int {
 // [GameMap].
 func (gm *GameMap) GetTileAt(p Point) Tile {
 	return *gm.tiles[gm.GetIndex(p)]
-}
-
-// Wall is a dummy to let us set some walls to verify we can't walk through
-// a non-walkable tile.
-var wall = &Tile{
-	Walkable:    false,
-	Transparent: false,
-	SpriteName:  "wall_horiz",
 }
