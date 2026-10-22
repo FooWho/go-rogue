@@ -68,6 +68,78 @@
                 "flippedY": false,
                 "rotation": 1
             },
+            "wallTRight": {
+                "imageLoc": {"X": 10, "Y": 4},
+                "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
+                "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "wallTDown": {
+                "imageLoc": {"X": 10, "Y": 4},
+                "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
+                "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0.5
+            },
+            "wallTLeft": {
+                "imageLoc": {"X": 10, "Y": 4},
+                "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
+                "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 1.0
+            },
+            "wallTUp": {
+                "imageLoc": {"X": 10, "Y": 4},
+                "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
+                "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 1.5
+            },
+            "wall4Way": {
+                "imageLoc": {"X": 11, "Y": 4},
+                "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
+                "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "wallCapUp": {
+                "imageLoc": {"X": 12, "Y": 4},
+                "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
+                "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "wallCapRight": {
+                "imageLoc": {"X": 12, "Y": 4},
+                "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
+                "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0.5
+            },
+            "wallCapDown": {
+                "imageLoc": {"X": 12, "Y": 4},
+                "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
+                "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 1.0
+            },
+            "wallCapLeft": {
+                "imageLoc": {"X": 12, "Y": 4},
+                "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
+                "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 1.5
+            },
             "floor": {
                 "imageLoc": {"x": 16, "y": 0},
                 "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
@@ -110,7 +182,7 @@
             "wallVert": {
                 "imageLoc": {"x": 0, "y": 0},
                 "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
-                "colorBG": {"R": 150, "G": 50, "B": 150, "A": 255},
+                "colorBG": {"R": 25, "G": 25, "B": 25, "A": 255},
                 "flippedX": false,
                 "flippedY": false,
                 "rotation": 0
@@ -118,7 +190,7 @@
             "wallHoriz": {
                 "imageLoc": {"x": 0, "y": 0},
                 "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
-                "colorBG": {"R": 150, "G": 50, "B": 150, "A": 255},
+                "colorBG": {"R": 25, "G": 25, "B": 25, "A": 255},
                 "flippedX": false,
                 "flippedY": false,
                 "rotation": 0
@@ -126,7 +198,7 @@
             "wallTL": {
                 "imageLoc": {"x": 0, "y": 0},
                 "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
-                "colorBG": {"R": 150, "G": 50, "B": 150, "A": 255},
+                "colorBG": {"R": 25, "G": 25, "B": 25, "A": 255},
                 "flippedX": false,
                 "flippedY": false,
                 "rotation": 0
@@ -134,7 +206,7 @@
             "wallTR": {
                 "imageLoc": {"x": 0, "y": 0},
                 "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
-                "colorBG": {"R": 150, "G": 50, "B": 150, "A": 255},
+                "colorBG": {"R": 25, "G": 25, "B": 25, "A": 255},
                 "flippedX": false,
                 "flippedY": false,
                 "rotation": 0
@@ -142,7 +214,7 @@
             "wallBL": {
                 "imageLoc": {"x": 0, "y": 0},
                 "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
-                "colorBG": {"R": 150, "G": 50, "B": 150, "A": 255},
+                "colorBG": {"R": 25, "G": 25, "B": 25, "A": 255},
                 "flippedX": false,
                 "flippedY": false,
                 "rotation": 0
@@ -150,15 +222,87 @@
             "wallBR": {
                 "imageLoc": {"x": 0, "y": 0},
                 "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
-                "colorBG": {"R": 150, "G": 50, "B": 150, "A": 255},
+                "colorBG": {"R": 25, "G": 25, "B": 25, "A": 255},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "wallTUp": {
+                "imageLoc": {"x": 0, "y": 0},
+                "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
+                "colorBG": {"R": 25, "G": 25, "B": 25, "A": 255},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "wallTDown": {
+                "imageLoc": {"x": 0, "y": 0},
+                "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
+                "colorBG": {"R": 25, "G": 25, "B": 25, "A": 255},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "wallTLeft": {
+                "imageLoc": {"x": 0, "y": 0},
+                "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
+                "colorBG": {"R": 25, "G": 25, "B": 25, "A": 255},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "wallTRight": {
+                "imageLoc": {"x": 0, "y": 0},
+                "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
+                "colorBG": {"R": 25, "G": 25, "B": 25, "A": 255},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "wall4Way": {
+                "imageLoc": {"x": 0, "y": 0},
+                "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
+                "colorBG": {"R": 25, "G": 25, "B": 25, "A": 255},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "wallCapUp": {
+                "imageLoc": {"x": 0, "y": 0},
+                "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
+                "colorBG": {"R": 25, "G": 25, "B": 25, "A": 255},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "wallCapDown": {
+                "imageLoc": {"x": 0, "y": 0},
+                "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
+                "colorBG": {"R": 25, "G": 25, "B": 25, "A": 255},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "wallCapLeft": {
+                "imageLoc": {"x": 0, "y": 0},
+                "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
+                "colorBG": {"R": 25, "G": 25, "B": 25, "A": 255},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "wallCapRight": {
+                "imageLoc": {"x": 0, "y": 0},
+                "colorFG": {"R": 0, "G": 0, "B": 0, "A": 0},
+                "colorBG": {"R": 25, "G": 25, "B": 25, "A": 255},
                 "flippedX": false,
                 "flippedY": false,
                 "rotation": 0
             },
             "floor": {
                 "imageLoc": {"x": 0, "y": 0},
-                "colorFG": {"R": 50, "G": 0, "B": 50, "A": 255},
-                "colorBG": {"R": 50, "G": 50, "B": 150, "A": 255},
+                "colorFG": {"R": 0, "G": 0, "B": 0, "A": 0},
+                "colorBG": {"R": 100, "G": 100, "B": 100, "A": 255},
                 "flippedX": false,
                 "flippedY": false,
                 "rotation": 0

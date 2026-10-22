@@ -42,6 +42,60 @@ var wallVert = &Tile{
 	SpriteName:  "wallVert",
 }
 
+var wallTRight = &Tile{
+	Walkable:    false,
+	Transparent: false,
+	SpriteName:  "wallTRight",
+}
+
+var wallTDown = &Tile{
+	Walkable:    false,
+	Transparent: false,
+	SpriteName:  "wallTDown",
+}
+
+var wallTLeft = &Tile{
+	Walkable:    false,
+	Transparent: false,
+	SpriteName:  "wallTLeft",
+}
+
+var wallTUp = &Tile{
+	Walkable:    false,
+	Transparent: false,
+	SpriteName:  "wallTUp",
+}
+
+var wall4Way = &Tile{
+	Walkable:    false,
+	Transparent: false,
+	SpriteName:  "wall4Way",
+}
+
+var wallCapUp = &Tile{
+	Walkable:    false,
+	Transparent: false,
+	SpriteName:  "wallCapUp",
+}
+
+var wallCapRight = &Tile{
+	Walkable:    false,
+	Transparent: false,
+	SpriteName:  "wallCapRight",
+}
+
+var wallCapDown = &Tile{
+	Walkable:    false,
+	Transparent: false,
+	SpriteName:  "wallCapDown",
+}
+
+var wallCapLeft = &Tile{
+	Walkable:    false,
+	Transparent: false,
+	SpriteName:  "wallCapLeft",
+}
+
 var bedrock = &Tile{
 	Walkable:    false,
 	Transparent: false,
