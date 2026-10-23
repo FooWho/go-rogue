@@ -24,15 +24,12 @@ func (g *Game) Update() error {
 	if action == nil {
 		return nil
 	}
-	if action != nil {
-		switch v := action.(type) {
-		case *MovementAction:
-			g.playerX += (v.dx * g.charWidth)
-			g.playerY += (v.dy * g.charHeight)
-		case *EscapeAction:
-			return ebiten.Termination
-		default:
-		}
+	switch v := action.(type) {
+	case *MovementAction:
+		g.playerX += (v.dx * g.charWidth)
+		g.playerY += (v.dy * g.charHeight)
+	case *EscapeAction:
+		return ebiten.Termination
 	}
 	return nil
 }
@@ -54,15 +51,18 @@ func main() {
 		gridRows:   50,
 		charWidth:  6,
 		charHeight: 16,
-		playerX:    (80 / 2) * 6,
-		playerY:    (50 / 2) * 16,
+		// 80 columns, each 6 pixels wide. The center column is thus (80 / 2) * 6
+		playerX: (80 / 2) * 6,
+		// 50 rows, each 16 pixels tall. The center row is thus (50 / 2) * 16
+		playerY: (50 / 2) * 16,
 	}
 	// This line sets the window to match the logical screen pixel for pixel.
 	// This produces the awkward aspect ratio.
 	// ebiten.SetWindowSize(game.gridCols*game.charWidth, game.gridRows*game.charHeight)
-	// This line sets the window size to something more reasonable. This does
-	// result in a skew in the "graphics", but since our only graphic is the little '@',
-	// I don't think it is an issue.
+	// This sets the physical window to a landscape 800x500 size. Because Layout()
+	// returns 480x800, Ebitengine scales the logical screen to fit vertically and
+	// pillarboxes the left and right sides. We'll fix this properly in Chapter 2
+	// when we switch to a square 10x10 tileset font.
 	ebiten.SetWindowSize(800, 500)
 	ebiten.SetWindowTitle("Go Rogue!")
 	err := ebiten.RunGame(&game)
