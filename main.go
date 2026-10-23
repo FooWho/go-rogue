@@ -57,7 +57,13 @@ func main() {
 		playerX:    (80 / 2) * 6,
 		playerY:    (50 / 2) * 16,
 	}
-	ebiten.SetWindowSize(game.gridCols*game.charWidth, game.gridRows*game.charHeight)
+	// This line sets the window to match the logical screen pixel for pixel.
+	// This produces the awkward aspect ratio.
+	// ebiten.SetWindowSize(game.gridCols*game.charWidth, game.gridRows*game.charHeight)
+	// This line sets the window size to something more reasonable. This does
+	// result in a skew in the "graphics", but since our only graphic is the little '@',
+	// I don't think it is an issue.
+	ebiten.SetWindowSize(800, 500)
 	ebiten.SetWindowTitle("Go Rogue!")
 	err := ebiten.RunGame(&game)
 	if err != nil && err != ebiten.Termination {
