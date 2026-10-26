@@ -18,8 +18,7 @@ type Entity struct {
 
 // Move updates the [Entity]'s location with the supplied [Vector].
 func (e *Entity) Move(direction Vector) {
-	e.Loc.X += direction.X
-	e.Loc.Y += direction.Y
+	e.Loc = e.Loc.Add(direction)
 }
 
 // Behavior is the interface that will allow an [Entity] to have rules for how
