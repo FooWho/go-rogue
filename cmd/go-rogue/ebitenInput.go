@@ -17,20 +17,35 @@ type EbitenInput struct{}
 func (i *EbitenInput) WantsToMove() engine.Vector {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyUp) ||
-		inpututil.IsKeyJustPressed(ebiten.KeyW) {
+		inpututil.IsKeyJustPressed(ebiten.KeyW) ||
+		inpututil.IsKeyJustPressed(ebiten.KeyNumpad8) {
 		return engine.Vector{X: 0, Y: -1}
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyDown) ||
-		inpututil.IsKeyJustPressed(ebiten.KeyS) {
+		inpututil.IsKeyJustPressed(ebiten.KeyS) ||
+		inpututil.IsKeyJustPressed(ebiten.KeyNumpad2) {
 		return engine.Vector{X: 0, Y: 1}
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyLeft) ||
-		inpututil.IsKeyJustPressed(ebiten.KeyA) {
+		inpututil.IsKeyJustPressed(ebiten.KeyA) ||
+		inpututil.IsKeyJustPressed(ebiten.KeyNumpad4) {
 		return engine.Vector{X: -1, Y: 0}
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyRight) ||
-		inpututil.IsKeyJustPressed(ebiten.KeyD) {
+		inpututil.IsKeyJustPressed(ebiten.KeyNumpad6) {
 		return engine.Vector{X: 1, Y: 0}
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyNumpad7) {
+		return engine.Vector{X: -1, Y: -1}
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyNumpad9) {
+		return engine.Vector{X: 1, Y: -1}
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyNumpad1) {
+		return engine.Vector{X: -1, Y: 1}
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyNumpad3) {
+		return engine.Vector{X: 1, Y: 1}
 	}
 
 	return engine.Vector{X: 0, Y: 0}
