@@ -16,16 +16,20 @@ type EbitenInput struct{}
 // the appropriate direction. Otherwise, we stay still.
 func (i *EbitenInput) WantsToMove() engine.Vector {
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyUp) || inpututil.IsKeyJustPressed(ebiten.KeyW) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyUp) ||
+		inpututil.IsKeyJustPressed(ebiten.KeyW) {
 		return engine.Vector{X: 0, Y: -1}
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyDown) || inpututil.IsKeyJustPressed(ebiten.KeyS) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyDown) ||
+		inpututil.IsKeyJustPressed(ebiten.KeyS) {
 		return engine.Vector{X: 0, Y: 1}
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyLeft) || inpututil.IsKeyJustPressed(ebiten.KeyA) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyLeft) ||
+		inpututil.IsKeyJustPressed(ebiten.KeyA) {
 		return engine.Vector{X: -1, Y: 0}
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyRight) || inpututil.IsKeyJustPressed(ebiten.KeyD) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyRight) ||
+		inpututil.IsKeyJustPressed(ebiten.KeyD) {
 		return engine.Vector{X: 1, Y: 0}
 	}
 
