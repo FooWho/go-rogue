@@ -64,9 +64,7 @@ func NewRenderer(
 // background. The process is then repeated for each [engine.Entity].
 func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 	opFG := &ebiten.DrawImageOptions{}
-	opFG.Filter = ebiten.FilterPixelated
 	opBG := &ebiten.DrawImageOptions{}
-	opBG.Filter = ebiten.FilterPixelated
 
 	for y := 0; y < r.viewportRows; y++ {
 		for x := 0; x < r.viewportCols; x++ {
