@@ -86,7 +86,7 @@ func (gm *GameMap) Height() int {
 	return gm.rows
 }
 
-// GetTilesAt returns a copy of the [Tile] at the specified [Point] in the
+// GetTileAt returns a copy of the [Tile] at the specified [Point] in the
 // [GameMap].
 func (gm *GameMap) GetTileAt(p Point) Tile {
 	return *gm.tiles[gm.GetIndex(p)]

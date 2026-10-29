@@ -86,7 +86,7 @@ func main() {
 		},
 		Behavior: nil,
 	}
-	npcs := append(([]*engine.Entity)(nil), npc)
+	npcs := []*engine.Entity{npc}
 	game, err := engine.NewGame(gameCols,
 		gameRows,
 		player,
