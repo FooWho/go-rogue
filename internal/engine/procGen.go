@@ -20,6 +20,7 @@ func (gm *GameMap) NewRectangularRoom(topLeft, bottomRight Point) {
 			gm.tiles[gm.GetIndex(Point{x, y})] = floor
 		}
 	}
+	gm.rooms = append(gm.rooms, rr)
 }
 
 func (rr RectangularRoom) Center() Point {
@@ -37,27 +38,23 @@ func (rr RectangularRoom) Overlap(room RectangularRoom) bool {
 }
 
 func (gm *GameMap) GenerateDungeon(config ConfigurationFile) {
-
-	rooms := make([]RectangularRoom, 0, config.RoomsMax)
 	var overlap = false
 	for range config.RoomsMax {
 		roomWidth := rand.N(config.RoomWidthMax-config.RoomWidthMin) + config.RoomWidthMin
 		roomHeight := rand.N(config.RoomHeightMax-config.RoomHeightMin) + config.RoomHeightMin
 		x := rand.N(gm.cols - roomWidth - 1)
 		y := rand.N(gm.rows - roomHeight - 1)
-		for i := range rooms {
-			if rooms[i].Overlap(RectangularRoom{topLeft: Point{X: x, Y: y}, bottomRight: Point{X: x + roomWidth, Y: y + roomHeight}}) {
+		for i := range gm.rooms {
+			if gm.rooms[i].Overlap(RectangularRoom{topLeft: Point{X: x, Y: y}, bottomRight: Point{X: x + roomWidth, Y: y + roomHeight}}) {
 				overlap = true
 				break
 			}
 		}
 		if !overlap {
 			gm.NewRectangularRoom(Point{X: x, Y: y}, Point{X: x + roomWidth, Y: y + roomHeight})
-			rooms = append(rooms, RectangularRoom{topLeft: Point{X: x, Y: y}, bottomRight: Point{X: x + roomWidth, Y: y + roomHeight}})
 		}
 		overlap = false
 	}
-	gm.rooms = rooms
 	gm.MakeHalls()
 	gm.MakeWalls()
 }

@@ -29,6 +29,7 @@ func NewGameMap(cols, rows int, config ConfigurationFile) *GameMap {
 			gm.tiles[gm.GetIndex(Point{X: x, Y: y})] = bedrock
 		}
 	}
+	gm.rooms = make([]RectangularRoom, 0, config.RoomsMax)
 	gm.GenerateDungeon(config)
 	return gm
 }
