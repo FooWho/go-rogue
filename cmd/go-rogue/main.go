@@ -43,23 +43,16 @@ func (g *GameRunner) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return g.renderer.Layout(outsideWidth, outsideHeight)
 }
 
-func (g *GameRunner) DrawFinalScreen(screen, offscreen *ebiten.Image, geoM ebiten.GeoM) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM = geoM
-
-	op.Filter = ebiten.FilterPixelated
-
-	screen.DrawImage(offscreen, op)
-}
-
 // Interface Guard
 var _ ebiten.Game = (*GameRunner)(nil)
 
 const (
-	gameCols = 80
-	gameRows = 50
-	playerX  = (gameCols / 2)
-	playerY  = (gameRows / 2)
+	gameCols   = 80
+	gameRows   = 50
+	tileWidth  = 10
+	tileHeight = 10
+	playerX    = (gameCols / 2)
+	playerY    = (gameRows / 2)
 )
 
 func main() {
@@ -99,7 +92,7 @@ func main() {
 		SpriteName: "monster",
 		Behavior:   nil,
 	}
-	npcs := append(([]*engine.Entity)(nil), npc)
+	npcs := []*engine.Entity{npc}
 	game, err := engine.NewGame(gameCols,
 		gameRows,
 		player,
