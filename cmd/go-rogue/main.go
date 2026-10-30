@@ -39,7 +39,7 @@ func (g *GameRunner) Draw(screen *ebiten.Image) {
 
 // Layout is a required method of Ebitengine's Game interface.
 func (g *GameRunner) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return gameWidth, gameHeight
+	return g.renderer.Layout(outsideWidth, outsideHeight)
 }
 
 // Interface Guard
@@ -50,8 +50,6 @@ const (
 	gameRows   = 50
 	tileWidth  = 10
 	tileHeight = 10
-	gameWidth  = gameCols * tileWidth
-	gameHeight = gameRows * tileHeight
 	playerX    = (gameCols / 2)
 	playerY    = (gameRows / 2)
 )
@@ -86,7 +84,7 @@ func main() {
 		},
 		Behavior: nil,
 	}
-	npcs := append(([]*engine.Entity)(nil), npc)
+	npcs := []*engine.Entity{npc}
 	game, err := engine.NewGame(gameCols,
 		gameRows,
 		player,

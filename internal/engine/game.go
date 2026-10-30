@@ -79,10 +79,6 @@ func (g *Game) Entities() []Entity {
 	return copies
 }
 
-// ErrQuit is a sentinel error indicating the player is shutting down
-// the game.
-var ErrQuit = errors.New("player requested quit")
-
 // Input is an interface to read player intention. This interface is used
 // to decouple the [Game] from the [Ebitengine]. The [Game] does not
 // need to interact directly with [Ebitengine] for processing the keyboard.
@@ -94,6 +90,10 @@ type Input interface {
 	WantsToMove() (direction Vector)
 	WantsToQuit() bool
 }
+
+// ErrQuit is a sentinel error indicating the player is shutting down
+// the game.
+var ErrQuit = errors.New("player requested quit")
 
 // ImpossibleActionError is used to indicate an [Entity] tried to
 // [Action.Perform] an [Action] that wasn't allowed, for example walk
