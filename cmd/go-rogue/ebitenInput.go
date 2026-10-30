@@ -32,6 +32,7 @@ func (i *EbitenInput) WantsToMove() engine.Vector {
 		return engine.Vector{X: -1, Y: 0}
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyRight) ||
+		inpututil.IsKeyJustPressed(ebiten.KeyD) ||
 		inpututil.IsKeyJustPressed(ebiten.KeyNumpad6) {
 		return engine.Vector{X: 1, Y: 0}
 	}
