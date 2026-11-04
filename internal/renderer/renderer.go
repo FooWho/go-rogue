@@ -19,12 +19,12 @@ type SpriteSheet map[string]*Sprite
 
 // Renderer contains the data needed to draw the screen when the game state
 // updates. The [SpriteSheet] is loaded via the [NewRenderer] function. The
-// whitePixel field is used to tint sprites and is held here just so it
+// whiteTile field is used to tint sprites and is held here just so it
 // doesn't need to be recreated constantly.
 type Renderer struct {
 	name                       string
 	spriteSheet                SpriteSheet
-	whitePixel                 *ebiten.Image
+	whiteTile                  *ebiten.Image
 	tileWidth, tileHeight      int
 	viewportCols, viewportRows int
 }
@@ -46,10 +46,9 @@ func NewRenderer(
 	}
 	ebiten.SetWindowSize(1280, 800)
 	ebiten.SetWindowTitle("Go Rogue!")
-	whitePixel := ebiten.NewImage(1, 1)
-	whitePixel.Fill(color.White)
+	whiteTile := spriteSheet["whitePixel"].Img
 	return &Renderer{spriteSheet: spriteSheet,
-			whitePixel:   whitePixel,
+			whiteTile:    whiteTile,
 			tileWidth:    assetConfiguration.TileWidth,
 			tileHeight:   assetConfiguration.TileHeight,
 			viewportCols: viewportCols,
@@ -60,11 +59,14 @@ func NewRenderer(
 
 // Draw is called 60 times per second and performs the screen
 // refresh. It looks through [engine.GameMap] and draws the background (if not
-// transparent) for each [engine.Tile]. The process is then repeated for each
-// background. The process is then repeated for each [engine.Entity].
+// transparent) and then foreground (if not transparent) for each [engine.Tile].
+// The process is then repeated for each [engine.Entity].
 func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 	opFG := &ebiten.DrawImageOptions{}
 	opBG := &ebiten.DrawImageOptions{}
+
+	tileWidth := float64(r.tileWidth)
+	tileHeight := float64(r.tileHeight)
 
 	for y := 0; y < r.viewportRows; y++ {
 		for x := 0; x < r.viewportCols; x++ {
@@ -73,45 +75,22 @@ func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 
 			if visual.ColorBG.A > 0 {
 				opBG.GeoM.Reset()
-				opBG.GeoM.Scale(float64(r.tileWidth), float64(r.tileHeight))
 				opBG.GeoM.Translate(
-					float64(x*r.tileWidth),
-					float64(y*r.tileHeight),
+					float64(x)*tileWidth,
+					float64(y)*tileHeight,
 				)
-				opBG.ColorScale.Reset()
-				opBG.ColorScale.Scale(
-					float32(visual.ColorBG.R)/255.0,
-					float32(visual.ColorBG.G)/255.0,
-					float32(visual.ColorBG.B)/255.0,
-					float32(visual.ColorBG.A)/255.0,
+				opBG.ColorScale = visual.BGScale
+				screen.DrawImage(r.whiteTile, opBG)
+			}
+			if visual.ColorFG.A > 0 {
+				opFG.GeoM = visual.GeoM
+				opFG.GeoM.Translate(
+					float64(x)*tileWidth,
+					float64(y)*tileHeight,
 				)
-				screen.DrawImage(r.whitePixel, opBG)
+				opFG.ColorScale = visual.FGScale
+				screen.DrawImage(visual.Img, opFG)
 			}
-		}
-	}
-	for y := 0; y < r.viewportRows; y++ {
-		for x := 0; x < r.viewportCols; x++ {
-			tile := gameEngine.Map().GetTileAt(engine.Point{X: x, Y: y})
-			visual := r.spriteSheet[tile.SpriteName]
-			opFG.GeoM.Reset()
-			if visual.Rotation != float64(0) {
-				opFG.GeoM.Translate(-float64(r.tileWidth)/2, -float64(r.tileHeight)/2)
-				opFG.GeoM.Rotate(math.Pi * visual.Rotation)
-				opFG.GeoM.Translate(float64(r.tileWidth)/2, float64(r.tileHeight)/2)
-			}
-
-			opFG.GeoM.Translate(
-				float64(x*r.tileWidth),
-				float64(y*r.tileHeight),
-			)
-			opFG.ColorScale.Reset()
-			opFG.ColorScale.Scale(
-				float32(visual.ColorFG.R)/255.0,
-				float32(visual.ColorFG.G)/255.0,
-				float32(visual.ColorFG.B)/255.0,
-				float32(visual.ColorFG.A)/255.0,
-			)
-			screen.DrawImage(visual.Img, opFG)
 		}
 	}
 
@@ -120,39 +99,22 @@ func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 
 		if visual.ColorBG.A > 0 {
 			opBG.GeoM.Reset()
-			opBG.GeoM.Scale(float64(r.tileWidth), float64(r.tileHeight))
-			opBG.GeoM.Translate(float64(entity.Loc.X*r.tileWidth),
-				float64(entity.Loc.Y*r.tileHeight))
-			opBG.ColorScale.Reset()
-			opBG.ColorScale.Scale(
-				float32(visual.ColorBG.R)/255.0,
-				float32(visual.ColorBG.G)/255.0,
-				float32(visual.ColorBG.B)/255.0,
-				float32(visual.ColorBG.A)/255.0,
+			opBG.GeoM.Translate(
+				float64(entity.Loc.X)*tileWidth,
+				float64(entity.Loc.Y)*tileHeight,
 			)
-			screen.DrawImage(r.whitePixel, opBG)
+			opBG.ColorScale = visual.BGScale
+			screen.DrawImage(r.whiteTile, opBG)
 		}
-	}
-
-	for _, entity := range gameEngine.Entities() {
-		visual := r.spriteSheet[entity.SpriteName]
-		opFG.GeoM.Reset()
-		if visual.Rotation != float64(0) {
-			opFG.GeoM.Translate(-float64(r.tileWidth)/2, -float64(r.tileHeight)/2)
-			opFG.GeoM.Rotate(math.Pi * visual.Rotation)
-			opFG.GeoM.Translate(float64(r.tileWidth)/2, float64(r.tileHeight)/2)
+		if visual.ColorFG.A > 0 {
+			opFG.GeoM = visual.GeoM
+			opFG.GeoM.Translate(
+				float64(entity.Loc.X)*tileWidth,
+				float64(entity.Loc.Y)*tileHeight,
+			)
+			opFG.ColorScale = visual.FGScale
+			screen.DrawImage(visual.Img, opFG)
 		}
-
-		opFG.GeoM.Translate(float64(entity.Loc.X*r.tileWidth),
-			float64(entity.Loc.Y*r.tileHeight))
-		opFG.ColorScale.Reset()
-		opFG.ColorScale.Scale(
-			float32(visual.ColorFG.R)/255.0,
-			float32(visual.ColorFG.G)/255.0,
-			float32(visual.ColorFG.B)/255.0,
-			float32(visual.ColorFG.A)/255.0,
-		)
-		screen.DrawImage(visual.Img, opFG)
 	}
 }
 
@@ -192,14 +154,33 @@ func loadTileset(assetConfiguration AssetConfiguration) (SpriteSheet, error) {
 
 	for k, v := range assetConfiguration.AssetTilesMap {
 		tmpSprite := v
-		tileset[k] = &tmpSprite
-		rect := image.Rect(
-			tileset[k].ImageLoc.X*assetConfiguration.TileWidth,
-			tileset[k].ImageLoc.Y*assetConfiguration.TileHeight,
-			tileset[k].ImageLoc.X*assetConfiguration.TileWidth+assetConfiguration.TileWidth,
-			tileset[k].ImageLoc.Y*assetConfiguration.TileHeight+assetConfiguration.TileHeight,
+		x0 := tmpSprite.ImageLoc.X * assetConfiguration.TileWidth
+		y0 := tmpSprite.ImageLoc.Y * assetConfiguration.TileHeight
+		x1 := tmpSprite.ImageLoc.X*assetConfiguration.TileWidth + assetConfiguration.TileWidth
+		y1 := tmpSprite.ImageLoc.Y*assetConfiguration.TileHeight + assetConfiguration.TileHeight
+		halfW := float64(assetConfiguration.TileWidth) / 2
+		halfH := float64(assetConfiguration.TileHeight) / 2
+
+		rect := image.Rect(x0, y0, x1, y1)
+		tmpSprite.Img = baseImage.SubImage(rect).(*ebiten.Image)
+		if tmpSprite.Rotation != 0 {
+			tmpSprite.GeoM.Translate(-halfW, -halfH)
+			tmpSprite.GeoM.Rotate(math.Pi * tmpSprite.Rotation)
+			tmpSprite.GeoM.Translate(halfW, halfH)
+		}
+		tmpSprite.FGScale.Scale(
+			float32(tmpSprite.ColorFG.R)/255.0,
+			float32(tmpSprite.ColorFG.G)/255.0,
+			float32(tmpSprite.ColorFG.B)/255.0,
+			float32(tmpSprite.ColorFG.A)/255.0,
 		)
-		tileset[k].Img = baseImage.SubImage(rect).(*ebiten.Image)
+		tmpSprite.BGScale.Scale(
+			float32(tmpSprite.ColorBG.R)/255.0,
+			float32(tmpSprite.ColorBG.G)/255.0,
+			float32(tmpSprite.ColorBG.B)/255.0,
+			float32(tmpSprite.ColorBG.A)/255.0,
+		)
+		tileset[k] = &tmpSprite
 	}
 
 	return tileset, nil
@@ -222,4 +203,7 @@ type Sprite struct {
 	FlippedY bool         `json:"flippedY"`
 	Rotation float64      `json:"rotation"`
 	Img      *ebiten.Image
+	FGScale  ebiten.ColorScale
+	BGScale  ebiten.ColorScale
+	GeoM     ebiten.GeoM
 }
