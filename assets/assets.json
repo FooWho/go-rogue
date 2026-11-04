@@ -1,6 +1,6 @@
 {
     "graphic": {
-        "file": "monochrome-transparent_packed2.png",
+        "file": "monochrome-transparent_packed.png",
         "tileWidth": 16,
         "tileHeight": 16,
         "sprites": {
@@ -69,7 +69,7 @@
                 "rotation": 1
             },
             "wallTRight": {
-                "imageLoc": {"X": 10, "Y": 4},
+                "imageLoc": {"x": 10, "y": 4},
                 "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
                 "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
                 "flippedX": false,
@@ -77,7 +77,7 @@
                 "rotation": 0
             },
             "wallTDown": {
-                "imageLoc": {"X": 10, "Y": 4},
+                "imageLoc": {"x": 10, "y": 4},
                 "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
                 "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
                 "flippedX": false,
@@ -85,7 +85,7 @@
                 "rotation": 0.5
             },
             "wallTLeft": {
-                "imageLoc": {"X": 10, "Y": 4},
+                "imageLoc": {"x": 10, "y": 4},
                 "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
                 "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
                 "flippedX": false,
@@ -93,7 +93,7 @@
                 "rotation": 1.0
             },
             "wallTUp": {
-                "imageLoc": {"X": 10, "Y": 4},
+                "imageLoc": {"x": 10, "y": 4},
                 "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
                 "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
                 "flippedX": false,
@@ -101,7 +101,7 @@
                 "rotation": 1.5
             },
             "wall4Way": {
-                "imageLoc": {"X": 11, "Y": 4},
+                "imageLoc": {"x": 11, "y": 4},
                 "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
                 "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
                 "flippedX": false,
@@ -109,7 +109,7 @@
                 "rotation": 0
             },
             "wallCapUp": {
-                "imageLoc": {"X": 12, "Y": 4},
+                "imageLoc": {"x": 12, "y": 4},
                 "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
                 "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
                 "flippedX": false,
@@ -117,7 +117,7 @@
                 "rotation": 0
             },
             "wallCapRight": {
-                "imageLoc": {"X": 12, "Y": 4},
+                "imageLoc": {"x": 12, "y": 4},
                 "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
                 "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
                 "flippedX": false,
@@ -125,7 +125,7 @@
                 "rotation": 0.5
             },
             "wallCapDown": {
-                "imageLoc": {"X": 12, "Y": 4},
+                "imageLoc": {"x": 12, "y": 4},
                 "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
                 "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
                 "flippedX": false,
@@ -133,7 +133,7 @@
                 "rotation": 1.0
             },
             "wallCapLeft": {
-                "imageLoc": {"X": 12, "Y": 4},
+                "imageLoc": {"x": 12, "y": 4},
                 "colorFG": {"R": 100, "G": 100, "B": 100, "A": 255},
                 "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
                 "flippedX": false,
@@ -155,11 +155,19 @@
                 "flippedX": false,
                 "flippedY": false,
                 "rotation": 0
+            },
+            "whitePixel": {
+                "imageLoc": {"x": 8, "y": 5},
+                "colorFG": {"R": 255, "G": 255, "B": 255, "A": 255},
+                "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
             }
         } 
     },
     "ascii": {
-        "file": "dejavu10x10_gs_tc_transparent2.png",
+        "file": "dejavu10x10_gs_tc_transparent.png",
         "tileWidth": 10,
         "tileHeight": 10,
         "sprites": {
@@ -310,6 +318,14 @@
             "bedrock": {
                 "imageLoc": {"x": 25, "y": 2},
                 "colorFG": {"R": 0, "G": 0, "B": 0, "A": 255},
+                "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
+                "flippedX": false,
+                "flippedY": false,
+                "rotation": 0
+            },
+            "whitePixel": {
+                "imageLoc": {"x": 25, "y": 2},
+                "colorFG": {"R": 255, "G": 255, "B": 255, "A": 255},
                 "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
                 "flippedX": false,
                 "flippedY": false,
