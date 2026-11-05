@@ -1,9 +1,8 @@
 package engine
 
-// Tile is the representation used by the [GameMap]. A Tile can be walkable,
-// transparent, and has a graphical representation. Currently we only have a
-// DarkGraphic, because that is where we are at in the tutorial. Eventually we
-// will have a LitGraphic or something similar.
+// Tile is the representation of a grid location used by the [GameMap].
+// A Tile can be walkable, transparent, and stores a string and an integer
+// for identification of the correct sprite.
 type Tile struct {
 	Walkable    bool
 	Transparent bool
@@ -13,15 +12,17 @@ type Tile struct {
 
 // GameMap is a cols*rows slice of [Tile] structs.  They are stored in one
 // dimension internally to ensure that the tiles are contiguous in memory.
+// It also holds a slice of [RectangularRoom] structs, define the rooms
+// that were created during the procedural map generation.
 type GameMap struct {
 	cols, rows int
 	tiles      []*Tile
 	rooms      []RectangularRoom
 }
 
-// NewGameMap generates a map for us. It is currently a "dummy" map that fills
-// the map with "floor" tiles and then sets a few tiles to be a wall. This is
-// just to test that we can't walk outside of the map or through a wall.
+// NewGameMap generates a map for us. It starts by filling the [GameMap] with
+// "bedrock" tiles. It then calls [GenerateDungeon] to carve out a dungeon from
+// the bedrock.
 func NewGameMap(cols, rows int, config ConfigurationFile) *GameMap {
 	gm := &GameMap{cols: cols, rows: rows}
 	gm.tiles = make([]*Tile, cols*rows)
@@ -41,16 +42,23 @@ func (gm *GameMap) GetIndex(p Point) int {
 	return p.Y*gm.cols + p.X
 }
 
-// InBounds tests if a [Point] is inside of the [GameMap].
+// InBounds tests if a [Point] is inside of the [GameMap] dimensions.
 func (gm *GameMap) InBounds(p Point) bool {
 	return 0 <= p.X && p.X < gm.cols && 0 <= p.Y && p.Y < gm.rows
 }
 
-// Walkable tests if the [Tile] at [Point] is walkable. It is a helper
+// IsWalkable tests if the [Tile] at [Point] is walkable. It is a helper
 // so that [GetIndex] doesn't have to be called in other places and we
 // can operate directly on a [Point].
-func (gm *GameMap) Walkable(p Point) bool {
+func (gm *GameMap) IsWalkable(p Point) bool {
 	return gm.tiles[gm.GetIndex(p)].Walkable
+}
+
+// IsTransparent tests if the [Tile] at [Point] is transparent. It is a helper
+// so that [GetIndex] doesn't have to be called in other places and we
+// can operate directly on a [Point].
+func (gm *GameMap) IsTransparent(p Point) bool {
+	return gm.tiles[gm.GetIndex(p)].Transparent
 }
 
 // MapViewer exposes the methods needed to read the [GameMap] and prevents it

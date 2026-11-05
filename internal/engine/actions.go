@@ -35,7 +35,7 @@ func (ma *MovementAction) Perform(g *Game, e *Entity) error {
 		}
 	}
 
-	if !g.gameMap.Walkable(destination) {
+	if !g.gameMap.IsWalkable(destination) {
 		return &ImpossibleActionError{Reason: "You walk into the wall. Ouch!"}
 	}
 
