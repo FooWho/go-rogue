@@ -1,5 +1,25 @@
 package engine
 
+var allTiles = []*Tile{
+	floor,
+	wallTL,
+	wallTR,
+	wallBR,
+	wallBL,
+	wallHoriz,
+	wallVert,
+	wallTRight,
+	wallTDown,
+	wallTLeft,
+	wallTUp,
+	wall4Way,
+	wallCapUp,
+	wallCapRight,
+	wallCapDown,
+	wallCapLeft,
+	bedrock,
+}
+
 var floor = &Tile{
 	Walkable:    true,
 	Transparent: true,
@@ -100,4 +120,18 @@ var bedrock = &Tile{
 	Walkable:    false,
 	Transparent: false,
 	SpriteName:  "bedrock",
+}
+
+var whiteTile = &Tile{
+	SpriteName: "whiteTile",
+}
+
+// BindTileSpriteIDs maps human-readable sprite names to the renderer's
+// integer IDs.
+func BindTileSpriteIDs(nameToID map[string]int) {
+	for _, t := range allTiles {
+		if id, ok := nameToID[t.SpriteName]; ok {
+			t.SpriteID = id
+		}
+	}
 }

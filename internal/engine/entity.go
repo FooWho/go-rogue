@@ -13,6 +13,7 @@ type Entity struct {
 	Loc        Point
 	Name       string
 	SpriteName string
+	SpriteID   int
 	Behavior   Behavior
 }
 

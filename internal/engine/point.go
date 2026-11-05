@@ -2,7 +2,8 @@ package engine
 
 // Point is a standard X, Y for the 2D Grid.
 type Point struct {
-	X, Y int
+	X int `json:"x"`
+	Y int `json:"y"`
 }
 
 // Vector is just a [Point] under the hood, but use it to provide sematic

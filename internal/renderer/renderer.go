@@ -15,7 +15,7 @@ import (
 // SpriteSheet is a map of an asset name to an asset image. The images
 // are extracted from one large sprite sheet during the construction of the
 // [Renderer].
-type SpriteSheet map[string]*Sprite
+type SpriteSheet []*Sprite
 
 // Renderer contains the data needed to draw the screen when the game state
 // updates. The [SpriteSheet] is loaded via the [NewRenderer] function. The
@@ -39,14 +39,15 @@ type Renderer struct {
 func NewRenderer(
 	assetConfiguration AssetConfiguration,
 	viewportCols, viewportRows int,
-) (*Renderer, error) {
-	spriteSheet, err := loadTileset(assetConfiguration)
+) (*Renderer, map[string]int, error) {
+	spriteSheet, namesToIDs, err := loadTileset(assetConfiguration)
+	engine.BindTileSpriteIDs(namesToIDs)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	ebiten.SetWindowSize(1280, 800)
 	ebiten.SetWindowTitle("Go Rogue!")
-	whiteTile := spriteSheet["whitePixel"].Img
+	whiteTile := spriteSheet[namesToIDs["whiteTile"]].Img
 	return &Renderer{spriteSheet: spriteSheet,
 			whiteTile:    whiteTile,
 			tileWidth:    assetConfiguration.TileWidth,
@@ -54,6 +55,7 @@ func NewRenderer(
 			viewportCols: viewportCols,
 			viewportRows: viewportRows,
 		},
+		namesToIDs,
 		nil
 }
 
@@ -71,7 +73,7 @@ func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 	for y := 0; y < r.viewportRows; y++ {
 		for x := 0; x < r.viewportCols; x++ {
 			tile := gameEngine.Map().GetTileAt(engine.Point{X: x, Y: y})
-			visual := r.spriteSheet[tile.SpriteName]
+			visual := r.spriteSheet[tile.SpriteID]
 
 			if visual.ColorBG.A > 0 {
 				opBG.GeoM.Reset()
@@ -95,7 +97,7 @@ func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 	}
 
 	for _, entity := range gameEngine.Entities() {
-		visual := r.spriteSheet[entity.SpriteName]
+		visual := r.spriteSheet[entity.SpriteID]
 
 		if visual.ColorBG.A > 0 {
 			opBG.GeoM.Reset()
@@ -137,21 +139,23 @@ func (r *Renderer) Layout(
 // The "dejavu10x10_gs_tc_transparent.png" graphic adds transparency. This
 // allows background colors to be set appropriately.
 // Currently we are only creating three sprites: '@', ' ', and '#'.
-func loadTileset(assetConfiguration AssetConfiguration) (SpriteSheet, error) {
-	tileset := make(map[string]*Sprite)
+func loadTileset(assetConfiguration AssetConfiguration) (SpriteSheet, map[string]int, error) {
+	tileset := make([]*Sprite, 0)
+	namesToIDs := make(map[string]int)
 	spriteSheetFile, err := assets.AssetsFS.ReadFile(
 		assetConfiguration.FileName,
 	)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	img, _, err := image.Decode(bytes.NewReader(spriteSheetFile))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	baseImage := ebiten.NewImageFromImage(img)
 
+	i := 0
 	for k, v := range assetConfiguration.AssetTilesMap {
 		tmpSprite := v
 		x0 := tmpSprite.ImageLoc.X * assetConfiguration.TileWidth
@@ -180,10 +184,12 @@ func loadTileset(assetConfiguration AssetConfiguration) (SpriteSheet, error) {
 			float32(tmpSprite.ColorBG.B)/255.0,
 			float32(tmpSprite.ColorBG.A)/255.0,
 		)
-		tileset[k] = &tmpSprite
+		tileset = append(tileset, &tmpSprite)
+		namesToIDs[k] = i
+		i++
 	}
 
-	return tileset, nil
+	return tileset, namesToIDs, nil
 }
 
 type AssetConfigurationSet map[string]AssetConfiguration

@@ -8,6 +8,7 @@ type Tile struct {
 	Walkable    bool
 	Transparent bool
 	SpriteName  string
+	SpriteID    int
 }
 
 // GameMap is a cols*rows slice of [Tile] structs.  They are stored in one
