@@ -29,7 +29,10 @@ type MovementAction struct{ Direction Vector }
 func (ma *MovementAction) Perform(g *Game, e *Entity) error {
 	destination := e.Loc.Add(ma.Direction)
 	if !g.gameMap.InBounds(destination) {
-		return &ImpossibleActionError{Reason: "A magical force prevents you from moving outside the bounds of the map."}
+		return &ImpossibleActionError{
+			Reason: "A magical force prevents you from moving outside the " +
+				"bounds of the map.",
+		}
 	}
 
 	if !g.gameMap.Walkable(destination) {
