@@ -71,7 +71,7 @@ func main() {
 	}
 	assetConfiguration := assetConfigurationSet[config.Tileset]
 	input := &EbitenInput{}
-	renderer, err :=
+	renderer, namesToIDs, err :=
 		renderer.NewRenderer(
 			assetConfiguration,
 			gameCols,
@@ -83,11 +83,13 @@ func main() {
 	player := &engine.Entity{Loc: engine.Point{X: playerX, Y: playerY},
 		Name:       "player",
 		SpriteName: "player",
+		SpriteID:   namesToIDs["player"],
 		Behavior:   &engine.PlayerControl{},
 	}
 	npc := &engine.Entity{Loc: engine.Point{X: gameCols/2 - 7, Y: gameRows / 2},
 		Name:       "monster",
 		SpriteName: "monster",
+		SpriteID:   namesToIDs["monster"],
 		Behavior:   nil,
 	}
 	npcs := []*engine.Entity{npc}
@@ -97,6 +99,7 @@ func main() {
 		npcs,
 		input,
 		config,
+		namesToIDs,
 	)
 	if err != nil {
 		log.Fatal(err)
