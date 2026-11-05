@@ -19,8 +19,8 @@ type GameRunner struct {
 	assetConfiguration renderer.AssetConfiguration
 }
 
-// This is a wrapper function that lets our [engine.Game] handle updates without
-// having to tie that directly to Ebitengine.
+// Update is a wrapper function that lets our [engine.Game] handle updates
+// without having to tie that directly to Ebitengine.
 func (g *GameRunner) Update() error {
 	err := g.gameState.Update()
 
@@ -31,14 +31,15 @@ func (g *GameRunner) Update() error {
 	return err
 }
 
-// Draw is a wrapper function that keeps our Renderer as separated from Ebitengine
-// as possible. I couldn't get it completely decoupled yet, though maybe in the
-// future. That will allow drop in replacements for other rendering.
+// Draw is a wrapper function that keeps our Renderer as separated from
+// Ebitengine as possible. This will allow drop in replacements for other
+// rendering in the future.
 func (g *GameRunner) Draw(screen *ebiten.Image) {
 	g.renderer.Draw(screen, g.gameState)
 }
 
-// Layout is a required method of Ebitengine's Game interface.
+// Layout is a wrapper function that keeps our Renderer separate from
+// the engine.
 func (g *GameRunner) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return g.renderer.Layout(outsideWidth, outsideHeight)
 }
@@ -80,20 +81,23 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	player := &engine.Entity{Loc: engine.Point{X: playerX, Y: playerY},
+	player := &engine.Entity{
+		Loc:        engine.Point{X: playerX, Y: playerY},
 		Name:       "player",
 		SpriteName: "player",
 		SpriteID:   namesToIDs["player"],
 		Behavior:   &engine.PlayerControl{},
 	}
-	npc := &engine.Entity{Loc: engine.Point{X: gameCols/2 - 7, Y: gameRows / 2},
+	npc := &engine.Entity{
+		Loc:        engine.Point{X: gameCols/2 - 7, Y: gameRows / 2},
 		Name:       "monster",
 		SpriteName: "monster",
 		SpriteID:   namesToIDs["monster"],
 		Behavior:   nil,
 	}
 	npcs := []*engine.Entity{npc}
-	game, err := engine.NewGame(gameCols,
+	game, err := engine.NewGame(
+		gameCols,
 		gameRows,
 		player,
 		npcs,
@@ -104,13 +108,19 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	gameRunner := &GameRunner{gameState: game, renderer: renderer, assetConfiguration: assetConfiguration}
+	gameRunner := &GameRunner{
+		gameState:          game,
+		renderer:           renderer,
+		assetConfiguration: assetConfiguration,
+	}
 	err = ebiten.RunGame(gameRunner)
 	if err != nil && err != ebiten.Termination {
 		log.Fatal(err)
 	}
 }
 
+// loadAssetConfigurationSet reads the assets.json file where the sprite
+// definitions are set.
 func loadAssetConfigurationSet() (renderer.AssetConfigurationSet, error) {
 	assetConfigurationFile, err := assets.AssetsFS.ReadFile("assets.json")
 	if err != nil {
