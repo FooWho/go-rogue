@@ -62,13 +62,13 @@ func (rr RectangularRoom) Overlap(room RectangularRoom) bool {
 // created by the call to [NewRectangularRoom]. Once we have attempted to create
 // the maximum number of rooms, we call [MakeHalls] to connect the rooms and
 // finally we call [MakeWalls] to setup the room walls.
-func (gm *GameMap) GenerateDungeon(config ConfigurationFile) {
+func (gm *GameMap) GenerateDungeon(roomConfig RoomConfiguration) {
 	var overlap = false
-	for range config.RoomsMax {
-		roomWidth := rand.N(config.RoomWidthMax-config.RoomWidthMin+1) +
-			config.RoomWidthMin
-		roomHeight := rand.N(config.RoomHeightMax-config.RoomHeightMin+1) +
-			config.RoomHeightMin
+	for range roomConfig.RoomsMax {
+		roomWidth := rand.N(roomConfig.RoomsWidthMax-roomConfig.RoomsWidthMin+1) +
+			roomConfig.RoomsWidthMin
+		roomHeight := rand.N(roomConfig.RoomsHeightMax-roomConfig.RoomsHeightMin+1) +
+			roomConfig.RoomsHeightMin
 		x := rand.N(gm.cols - roomWidth - 1)
 		y := rand.N(gm.rows - roomHeight - 1)
 		for i := range gm.rooms {
@@ -95,7 +95,6 @@ func (gm *GameMap) GenerateDungeon(config ConfigurationFile) {
 }
 
 // MakeHalls connects rooms by carving hallways between their center points.
-//
 // For each room, it searches subsequent rooms to find the closest neighbor,
 // ensuring all rooms are connected into a single network without redundant
 // reverse connections. Halls are carved in an "L" shape (or a straight line
@@ -237,6 +236,13 @@ func (gm *GameMap) connectsHorizontally(p1, p2 Point) bool {
 		gm.isFloor(Point{X: p2.X, Y: p2.Y + 1})
 }
 
+// MakeWalls loops through each [Tile] in the [GameMap]. Any tile that
+// touches a floor tile is marked a wall tile (wallHoriz).After this
+// step is complete, we again loop through the [Tile]s. For each wall
+// tile, the bitmask is calculated by calling getWallBitmask().
+// The bitmask is essentially a score for that tile, based on it's neighbors.
+// That score is then used to determine the correct type of wall tile by
+// calling getWallTileForMask().
 func (gm *GameMap) MakeWalls() {
 	for y := 0; y < gm.rows; y++ {
 		for x := 0; x < gm.cols; x++ {
@@ -259,18 +265,39 @@ func (gm *GameMap) MakeWalls() {
 	}
 }
 
+// inBounds tests if the [Tile] at a [Point] is within the bounds of
+// the [GameMap]. If so, it returns true and if not it returns false.
 func (gm *GameMap) inBounds(p Point) bool {
 	return p.X >= 0 && p.X < gm.cols && p.Y >= 0 && p.Y < gm.rows
 }
 
+// isWall tests if the [Tile] at a  [Point] in the [GameMap] is a type
+// of wall. If so, it returns true and if not it returns false.
 func (gm *GameMap) isWall(p Point) bool {
 	if !gm.inBounds(p) {
 		return false
 	}
 	t := gm.tiles[gm.GetIndex(p)]
-	return t != floor && t != bedrock
+
+	return (t == wallTL ||
+		t == wallTR ||
+		t == wallBR ||
+		t == wallBL ||
+		t == wallHoriz ||
+		t == wallVert ||
+		t == wallTRight ||
+		t == wallTDown ||
+		t == wallTLeft ||
+		t == wallTUp ||
+		t == wall4Way ||
+		t == wallCapUp ||
+		t == wallCapRight ||
+		t == wallCapDown ||
+		t == wallCapLeft)
 }
 
+// getWallTileForMask converts the calculated bitmask for a wall tile into
+// the correct Tile type based on the score.
 func (gm *GameMap) getWallTileForMask(mask int) *Tile {
 	switch mask {
 
@@ -313,6 +340,10 @@ func (gm *GameMap) getWallTileForMask(mask int) *Tile {
 	}
 }
 
+// getWallBitmask calculates the bitmask for a wall tile. This is done by
+// setting the first through fourth bits based on whether or not this tile
+// is connect to another wall tile above or below or to the left or right of
+// it. This should only be called on grid locations that are a wall.
 func (gm *GameMap) getWallBitmask(p Point) int {
 	mask := 0
 	if gm.connectsVertically(p, Point{X: p.X, Y: p.Y - 1}) {

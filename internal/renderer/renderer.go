@@ -2,6 +2,7 @@ package renderer
 
 import (
 	"bytes"
+	"encoding/json"
 	"image"
 	"image/color"
 	_ "image/png"
@@ -12,14 +13,14 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// SpriteSheet is a map of an asset name to an asset image. The images
+// SpriteSheet is a slice for holding asset images. The images
 // are extracted from one large sprite sheet during the construction of the
 // [Renderer].
 type SpriteSheet []*Sprite
 
 // Renderer contains the data needed to draw the screen when the game state
 // updates. The [SpriteSheet] is loaded via the [NewRenderer] function. The
-// whiteTile field is used to tint sprites and is held here just so it
+// whiteTile field is used to tint sprites and is held here so it
 // doesn't need to be recreated constantly.
 type Renderer struct {
 	name                       string
@@ -37,9 +38,11 @@ type Renderer struct {
 // window need to match in size. This will eventually be changed to allow for
 // arbitrary map sizes with the window acting as a viewport onto the map.
 func NewRenderer(
-	assetConfiguration AssetConfiguration,
-	viewportCols, viewportRows int,
+	viewportCols, viewportRows int, tilesetName string,
 ) (*Renderer, map[string]int, error) {
+
+	assetConfigurationSet, err := loadAssetConfigurationSet()
+	assetConfiguration := assetConfigurationSet[tilesetName]
 	spriteSheet, namesToIDs, err := loadTileset(assetConfiguration)
 	engine.BindTileSpriteIDs(namesToIDs)
 	if err != nil {
@@ -60,12 +63,12 @@ func NewRenderer(
 }
 
 // Draw is called 60 times per second and performs the screen
-// refresh. It looks through [engine.GameMap] and draws the background (if not
-// transparent) and then foreground (if not transparent) for each [engine.Tile].
-// The process is then repeated for each [engine.Entity].
+// refresh. It obtains a [engine.MapViewer] to examine the
+// [engine.Tile]s in the [engine.GameMap] and draws the sprite (if not
+// completely transparent) for each [engine.Tile]. It then loops over
+// the [engine.Entity] structs and draws them in the same manner.
 func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
-	opFG := &ebiten.DrawImageOptions{}
-	opBG := &ebiten.DrawImageOptions{}
+	op := &ebiten.DrawImageOptions{}
 
 	tileWidth := float64(r.tileWidth)
 	tileHeight := float64(r.tileHeight)
@@ -75,48 +78,26 @@ func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 			tile := gameEngine.Map().GetTileAt(engine.Point{X: x, Y: y})
 			visual := r.spriteSheet[tile.SpriteID]
 
-			if visual.ColorBG.A > 0 {
-				opBG.GeoM.Reset()
-				opBG.GeoM.Translate(
-					float64(x)*tileWidth,
-					float64(y)*tileHeight,
-				)
-				opBG.ColorScale = visual.BGScale
-				screen.DrawImage(r.whiteTile, opBG)
-			}
-			if visual.ColorFG.A > 0 {
-				opFG.GeoM = visual.GeoM
-				opFG.GeoM.Translate(
-					float64(x)*tileWidth,
-					float64(y)*tileHeight,
-				)
-				opFG.ColorScale = visual.FGScale
-				screen.DrawImage(visual.Img, opFG)
-			}
+			op.GeoM = visual.GeoM
+			op.GeoM.Translate(
+				float64(x)*tileWidth,
+				float64(y)*tileHeight,
+			)
+			op.ColorScale = visual.ColorScale
+			screen.DrawImage(visual.Img, op)
 		}
 	}
 
 	for _, entity := range gameEngine.Entities() {
 		visual := r.spriteSheet[entity.SpriteID]
 
-		if visual.ColorBG.A > 0 {
-			opBG.GeoM.Reset()
-			opBG.GeoM.Translate(
-				float64(entity.Loc.X)*tileWidth,
-				float64(entity.Loc.Y)*tileHeight,
-			)
-			opBG.ColorScale = visual.BGScale
-			screen.DrawImage(r.whiteTile, opBG)
-		}
-		if visual.ColorFG.A > 0 {
-			opFG.GeoM = visual.GeoM
-			opFG.GeoM.Translate(
-				float64(entity.Loc.X)*tileWidth,
-				float64(entity.Loc.Y)*tileHeight,
-			)
-			opFG.ColorScale = visual.FGScale
-			screen.DrawImage(visual.Img, opFG)
-		}
+		op.GeoM = visual.GeoM
+		op.GeoM.Translate(
+			float64(entity.Loc.X)*tileWidth,
+			float64(entity.Loc.Y)*tileHeight,
+		)
+		op.ColorScale = visual.ColorScale
+		screen.DrawImage(visual.Img, op)
 	}
 }
 
@@ -132,13 +113,9 @@ func (r *Renderer) Layout(
 }
 
 // loadTileset creates a [SpriteSheet] from a PNG in the embedded filesystem.
-// In the default PNG, "dejavu10x10_gs_tc.png", there is no transparency
-// and the sprites are on a black background. For these sprites, the background
-// color settings have no effect, though the glyph can be color tinted through
-// the foreground color setting.
-// The "dejavu10x10_gs_tc_transparent.png" graphic adds transparency. This
-// allows background colors to be set appropriately.
-// Currently we are only creating three sprites: '@', ' ', and '#'.
+// Sprites are loaded using the definitions from assets.json, also contained in
+// the embedded file system. Sprites are rotated and color tinted according to
+// those definitions so the [Draw] method doesn't have to perform any of that.
 func loadTileset(assetConfiguration AssetConfiguration) (SpriteSheet, map[string]int, error) {
 	tileset := make([]*Sprite, 0)
 	namesToIDs := make(map[string]int)
@@ -156,33 +133,28 @@ func loadTileset(assetConfiguration AssetConfiguration) (SpriteSheet, map[string
 	baseImage := ebiten.NewImageFromImage(img)
 
 	i := 0
+	halfW := float64(assetConfiguration.TileWidth) / 2
+	halfH := float64(assetConfiguration.TileHeight) / 2
 	for k, v := range assetConfiguration.AssetTilesMap {
-		tmpSprite := v
-		x0 := tmpSprite.ImageLoc.X * assetConfiguration.TileWidth
-		y0 := tmpSprite.ImageLoc.Y * assetConfiguration.TileHeight
-		x1 := tmpSprite.ImageLoc.X*assetConfiguration.TileWidth + assetConfiguration.TileWidth
-		y1 := tmpSprite.ImageLoc.Y*assetConfiguration.TileHeight + assetConfiguration.TileHeight
-		halfW := float64(assetConfiguration.TileWidth) / 2
-		halfH := float64(assetConfiguration.TileHeight) / 2
+		tmpSpriteConfig := v
+		x0 := tmpSpriteConfig.ImageLoc.X * assetConfiguration.TileWidth
+		y0 := tmpSpriteConfig.ImageLoc.Y * assetConfiguration.TileHeight
+		x1 := tmpSpriteConfig.ImageLoc.X*assetConfiguration.TileWidth + assetConfiguration.TileWidth
+		y1 := tmpSpriteConfig.ImageLoc.Y*assetConfiguration.TileHeight + assetConfiguration.TileHeight
 
 		rect := image.Rect(x0, y0, x1, y1)
+		tmpSprite := Sprite{}
 		tmpSprite.Img = baseImage.SubImage(rect).(*ebiten.Image)
-		if tmpSprite.Rotation != 0 {
+		if tmpSpriteConfig.Rotation != 0 {
 			tmpSprite.GeoM.Translate(-halfW, -halfH)
-			tmpSprite.GeoM.Rotate(math.Pi * tmpSprite.Rotation)
+			tmpSprite.GeoM.Rotate(math.Pi * tmpSpriteConfig.Rotation)
 			tmpSprite.GeoM.Translate(halfW, halfH)
 		}
-		tmpSprite.FGScale.Scale(
-			float32(tmpSprite.ColorFG.R)/255.0,
-			float32(tmpSprite.ColorFG.G)/255.0,
-			float32(tmpSprite.ColorFG.B)/255.0,
-			float32(tmpSprite.ColorFG.A)/255.0,
-		)
-		tmpSprite.BGScale.Scale(
-			float32(tmpSprite.ColorBG.R)/255.0,
-			float32(tmpSprite.ColorBG.G)/255.0,
-			float32(tmpSprite.ColorBG.B)/255.0,
-			float32(tmpSprite.ColorBG.A)/255.0,
+		tmpSprite.ColorScale.Scale(
+			float32(tmpSpriteConfig.Color.R)/255.0,
+			float32(tmpSpriteConfig.Color.G)/255.0,
+			float32(tmpSpriteConfig.Color.B)/255.0,
+			float32(tmpSpriteConfig.Color.A)/255.0,
 		)
 		tileset = append(tileset, &tmpSprite)
 		namesToIDs[k] = i
@@ -192,24 +164,48 @@ func loadTileset(assetConfiguration AssetConfiguration) (SpriteSheet, map[string
 	return tileset, namesToIDs, nil
 }
 
+// AssetConfigurationSet is all of the data for all sprite sets (currently
+// "ascii" and "graphic").
 type AssetConfigurationSet map[string]AssetConfiguration
 
+// AssetConfiguration is the sprite definitions for one asset set.
 type AssetConfiguration struct {
-	FileName      string            `json:"file"`
-	TileWidth     int               `json:"tileWidth"`
-	TileHeight    int               `json:"tileHeight"`
-	AssetTilesMap map[string]Sprite `json:"sprites"`
+	FileName      string                  `json:"file"`
+	TileWidth     int                     `json:"tileWidth"`
+	TileHeight    int                     `json:"tileHeight"`
+	AssetTilesMap map[string]spriteConfig `json:"sprites"`
 }
 
-type Sprite struct {
+// loadAssetConfigurationSet reads the assets.json file where the sprite
+// definitions are set.
+func loadAssetConfigurationSet() (AssetConfigurationSet, error) {
+	assetConfigurationFile, err := assets.AssetsFS.ReadFile("assets.json")
+	if err != nil {
+		return nil, err
+	}
+
+	var assetConfigurationSet AssetConfigurationSet
+
+	err = json.Unmarshal(assetConfigurationFile, &assetConfigurationSet)
+	if err != nil {
+		return nil, err
+	}
+	return assetConfigurationSet, nil
+}
+
+// spriteConfig defines the raw asset configuration parsed from assets.json.
+// It is used strictly during asset loading and discarded afterward.
+type spriteConfig struct {
 	ImageLoc engine.Point `json:"imageLoc"`
-	ColorFG  color.NRGBA  `json:"colorFG"`
-	ColorBG  color.NRGBA  `json:"colorBG"`
-	FlippedX bool         `json:"flippedX"`
-	FlippedY bool         `json:"flippedY"`
+	Color    color.NRGBA  `json:"color"`
 	Rotation float64      `json:"rotation"`
-	Img      *ebiten.Image
-	FGScale  ebiten.ColorScale
-	BGScale  ebiten.ColorScale
-	GeoM     ebiten.GeoM
+}
+
+// Sprite is the graphical representation for map tiles and entity sprites.
+// A sprite defines where it is positionally within the sprite sheet, what color
+// to tint it, how to rotate it, and the
+type Sprite struct {
+	Img        *ebiten.Image
+	ColorScale ebiten.ColorScale
+	GeoM       ebiten.GeoM
 }

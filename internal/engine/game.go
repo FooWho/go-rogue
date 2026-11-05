@@ -16,20 +16,7 @@ type Game struct {
 	namesToIDs map[string]int
 	gameMap    *GameMap
 	input      Input
-	config     ConfigurationFile
-}
-
-// ConfigurationFile holds which set of sprites/tiles we are using - currently
-// "ascii" or "graphic". It defines the maximum number of rooms we will attempt
-// to place when generating the dungeon, and the minimum and maximum sizes
-// for a room.
-type ConfigurationFile struct {
-	Tileset       string `json:"tileset"`
-	RoomsMax      int    `json:"roomsMax"`
-	RoomWidthMin  int    `json:"roomWidthMin"`
-	RoomWidthMax  int    `json:"roomWidthMax"`
-	RoomHeightMin int    `json:"roomHeightMin"`
-	RoomHeightMax int    `json:"roomHeightMax"`
+	//config     ConfigurationFile
 }
 
 // NewGame creates and initializes a new [Game] struct. We currently only have
@@ -44,16 +31,16 @@ func NewGame(
 	player *Entity,
 	npcs []*Entity,
 	input Input,
-	config ConfigurationFile,
+	roomsConfig RoomConfiguration,
 	namesToIDs map[string]int,
 ) (*Game, error) {
 
 	game := &Game{
 		player:   player,
 		entities: append([]*Entity{player}, npcs...),
-		gameMap:  NewGameMap(mapWidth, mapHeight, config),
+		gameMap:  NewGameMap(mapWidth, mapHeight, roomsConfig),
 		input:    input,
-		config:   config,
+		//config:   config,
 	}
 	return game, nil
 }
