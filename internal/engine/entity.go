@@ -1,14 +1,14 @@
 package engine
 
 // Entity is the base structure for all entities in the game. They have a
-// [Point] for location, a name, a [Graphic], and a [Behavior]. Currently, we
-// only have two kinds of entities, the player and the npc and the npc isn't
-// really different from a player, other than we don't read any input for it.
-// Eventually there will be more complicated structures as we have more types
-// of entities. The [Behavior] is the interface getting an entity's intended
-// [Action]. This will allow entities to have rules for what to do, for
-// example a trap can blow up because it was stepped on or a monster
-// can decide to chase the player or give up the chase.
+// [Point] for location, a name, a sprite name, a sprite ID,and a [Behavior].
+// Currently, we only have two kinds of entities, the player and the npc and
+// the npc isn't really different from a player, other than we don't read any
+// input for it. Eventually there will be more complicated structures as we
+// have more types of entities. The [Behavior] is the interface getting an
+// entity's intended [Action]. This will allow entities to have rules for
+// what to do, for example a trap can blow up because it was stepped on or
+// a monster can decide to chase the player or give up the chase.
 type Entity struct {
 	Loc        Point
 	Name       string

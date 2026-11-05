@@ -3,12 +3,13 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"image/color"
 )
 
 // Game represents the game state. It holds a reference to the player and a
 // slice for the [Entity] structs. The player is included in this slice
-// as the first element.
+// as the first element. It also has a map to convert a SpriteName to a
+// SpriteID, a pointer to the [GameMap] struct, the [Input] handler, and
+// the runtime configuration.
 type Game struct {
 	player     *Entity
 	entities   []*Entity
@@ -18,6 +19,10 @@ type Game struct {
 	config     ConfigurationFile
 }
 
+// ConfigurationFile holds which set of sprites/tiles we are using - currently
+// "ascii" or "graphic". It defines the maximum number of rooms we will attempt
+// to place when generating the dungeon, and the minimum and maximum sizes
+// for a room.
 type ConfigurationFile struct {
 	Tileset       string `json:"tileset"`
 	RoomsMax      int    `json:"roomsMax"`
@@ -30,7 +35,10 @@ type ConfigurationFile struct {
 // NewGame creates and initializes a new [Game] struct. We currently only have
 // one [GameMap] and so the size of the map is passed in for the game to
 // initialize it. This will certainly change at some point, because we
-// want to support multiple maps eventually.
+// want to support multiple maps eventually. We also pass in a pointer to the
+// [Entity] for the player and a slice of pointer to [Entity] for the NPCs.
+// It has the handler for [Input], the [ConfigurationFile], and a map to
+// convert sprite names to sprite IDs.
 func NewGame(
 	mapWidth, mapHeight int,
 	player *Entity,
@@ -50,11 +58,11 @@ func NewGame(
 	return game, nil
 }
 
-// Update is called 60 times per second for the game state to update.
-// Currently, it gets an [Action] from the [Entity] struct's
-// [Behavior.GetAction] method and attempts to [Action.Perform] it.
-// [ImpossibleActionError] indicates the action was not allowed,
-// for example, the player can't walk through the wall.
+// Update is called for the game state to update. Currently, it gets an
+// [Action] from the [Entity] struct's [Behavior.GetAction] method
+// and attempts to [Action.Perform] it. [ImpossibleActionError] indicates
+// the action was not allowed, for example, the player can't walk through
+// a wall.
 func (g *Game) Update() error {
 	action := g.player.Behavior.GetAction(g, g.player)
 	if action == nil {
@@ -120,13 +128,4 @@ type ImpossibleActionError struct {
 // Error is used to obtain the reason the [Action] was not allowed.
 func (e *ImpossibleActionError) Error() string {
 	return e.Reason
-}
-
-// Graphic is the visual representation of a tile. Name refers to the sprite
-// name for accessing the sprite from the SpriteSheet. FG and BG are the
-// foreground and background colors.
-type Graphic struct {
-	Name string
-	FG   color.NRGBA
-	BG   color.NRGBA
 }
