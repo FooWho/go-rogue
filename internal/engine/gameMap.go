@@ -23,7 +23,7 @@ type GameMap struct {
 // NewGameMap generates a map for us. It starts by filling the [GameMap] with
 // "bedrock" tiles. It then calls [GenerateDungeon] to carve out a dungeon from
 // the bedrock.
-func NewGameMap(cols, rows int, config ConfigurationFile) *GameMap {
+func NewGameMap(cols, rows int, roomsConfig RoomConfiguration) *GameMap {
 	gm := &GameMap{cols: cols, rows: rows}
 	gm.tiles = make([]*Tile, cols*rows)
 	for y := range rows {
@@ -31,8 +31,8 @@ func NewGameMap(cols, rows int, config ConfigurationFile) *GameMap {
 			gm.tiles[gm.GetIndex(Point{X: x, Y: y})] = bedrock
 		}
 	}
-	gm.rooms = make([]RectangularRoom, 0, config.RoomsMax)
-	gm.GenerateDungeon(config)
+	gm.rooms = make([]RectangularRoom, 0, roomsConfig.RoomsMax)
+	gm.GenerateDungeon(roomsConfig)
 	return gm
 }
 
@@ -83,4 +83,12 @@ func (gm *GameMap) Height() int {
 // [GameMap].
 func (gm *GameMap) GetTileAt(p Point) Tile {
 	return *gm.tiles[gm.GetIndex(p)]
+}
+
+type RoomConfiguration struct {
+	RoomsMax       int
+	RoomsWidthMin  int
+	RoomsWidthMax  int
+	RoomsHeightMin int
+	RoomsHeightMax int
 }

@@ -1,8 +1,8 @@
 {
     "tileset": "graphic",
     "roomsMax": 100,
-    "roomWidthMin": 5,
-    "roomWidthMax": 15,
-    "roomHeightMin": 5,
-    "roomHeightMax": 15
+    "roomsWidthMin": 5,
+    "roomsWidthMax": 15,
+    "roomsHeightMin": 5,
+    "roomsHeightMax": 15
 }

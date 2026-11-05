@@ -55,29 +55,18 @@ const (
 )
 
 func main() {
-
 	configurationFile, err := assets.AssetsFS.ReadFile("configuration.json")
 	if err != nil {
 		log.Fatal(err)
 	}
-	var config engine.ConfigurationFile
+	var config ConfigurationFile
 	err = json.Unmarshal(configurationFile, &config)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	assetConfigurationSet, err := loadAssetConfigurationSet()
-	if err != nil {
-		log.Fatal(err)
-	}
-	assetConfiguration := assetConfigurationSet[config.Tileset]
 	input := &EbitenInput{}
-	renderer, namesToIDs, err :=
-		renderer.NewRenderer(
-			assetConfiguration,
-			gameCols,
-			gameRows,
-		)
+
+	renderer, namesToIDs, err := renderer.NewRenderer(gameCols, gameRows, config.Tileset)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -96,22 +85,28 @@ func main() {
 		Behavior:   nil,
 	}
 	npcs := []*engine.Entity{npc}
+	roomsConfig := engine.RoomConfiguration{
+		RoomsMax:       config.RoomsMax,
+		RoomsWidthMin:  config.RoomsWidthMin,
+		RoomsWidthMax:  config.RoomsWidthMax,
+		RoomsHeightMin: config.RoomsHeightMin,
+		RoomsHeightMax: config.RoomsHeightMax,
+	}
 	game, err := engine.NewGame(
 		gameCols,
 		gameRows,
 		player,
 		npcs,
 		input,
-		config,
+		roomsConfig,
 		namesToIDs,
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 	gameRunner := &GameRunner{
-		gameState:          game,
-		renderer:           renderer,
-		assetConfiguration: assetConfiguration,
+		gameState: game,
+		renderer:  renderer,
 	}
 	err = ebiten.RunGame(gameRunner)
 	if err != nil && err != ebiten.Termination {
@@ -119,19 +114,15 @@ func main() {
 	}
 }
 
-// loadAssetConfigurationSet reads the assets.json file where the sprite
-// definitions are set.
-func loadAssetConfigurationSet() (renderer.AssetConfigurationSet, error) {
-	assetConfigurationFile, err := assets.AssetsFS.ReadFile("assets.json")
-	if err != nil {
-		return nil, err
-	}
-
-	var assetConfigurationSet renderer.AssetConfigurationSet
-
-	err = json.Unmarshal(assetConfigurationFile, &assetConfigurationSet)
-	if err != nil {
-		return nil, err
-	}
-	return assetConfigurationSet, nil
+// ConfigurationFile holds which set of sprites/tiles we are using - currently
+// "ascii" or "graphic". It defines the maximum number of rooms we will attempt
+// to place when generating the dungeon, and the minimum and maximum sizes
+// for a room.
+type ConfigurationFile struct {
+	Tileset        string `json:"tileset"`
+	RoomsMax       int    `json:"roomsMax"`
+	RoomsWidthMin  int    `json:"roomsWidthMin"`
+	RoomsWidthMax  int    `json:"roomsWidthMax"`
+	RoomsHeightMin int    `json:"roomsHeightMin"`
+	RoomsHeightMax int    `json:"roomsHeightMax"`
 }
