@@ -10,11 +10,12 @@ import (
 // slice for the [Entity] structs. The player is included in this slice
 // as the first element.
 type Game struct {
-	player   *Entity
-	entities []*Entity
-	gameMap  *GameMap
-	input    Input
-	config   ConfigurationFile
+	player     *Entity
+	entities   []*Entity
+	namesToIDs map[string]int
+	gameMap    *GameMap
+	input      Input
+	config     ConfigurationFile
 }
 
 type ConfigurationFile struct {
@@ -36,6 +37,7 @@ func NewGame(
 	npcs []*Entity,
 	input Input,
 	config ConfigurationFile,
+	namesToIDs map[string]int,
 ) (*Game, error) {
 
 	game := &Game{

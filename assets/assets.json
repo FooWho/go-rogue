@@ -156,7 +156,7 @@
                 "flippedY": false,
                 "rotation": 0
             },
-            "whitePixel": {
+            "whiteTile": {
                 "imageLoc": {"x": 8, "y": 5},
                 "colorFG": {"R": 255, "G": 255, "B": 255, "A": 255},
                 "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
@@ -323,7 +323,7 @@
                 "flippedY": false,
                 "rotation": 0
             },
-            "whitePixel": {
+            "whiteTile": {
                 "imageLoc": {"x": 25, "y": 2},
                 "colorFG": {"R": 255, "G": 255, "B": 255, "A": 255},
                 "colorBG": {"R": 0, "G": 0, "B": 0, "A": 0},
