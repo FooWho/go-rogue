@@ -14,9 +14,8 @@ import (
 
 // GameRunner is a wrapper to decouple our game state from the Ebitengine.
 type GameRunner struct {
-	gameState          *engine.Game
-	renderer           *renderer.Renderer
-	assetConfiguration renderer.AssetConfiguration
+	gameState *engine.Game
+	renderer  *renderer.Renderer
 }
 
 // Update is a wrapper function that lets our [engine.Game] handle updates
@@ -87,6 +86,7 @@ func main() {
 	npcs := []*engine.Entity{npc}
 	roomsConfig := engine.RoomConfiguration{
 		RoomsMax:       config.RoomsMax,
+		RoomsMin:       config.RoomsMin,
 		RoomsWidthMin:  config.RoomsWidthMin,
 		RoomsWidthMax:  config.RoomsWidthMax,
 		RoomsHeightMin: config.RoomsHeightMin,
@@ -116,11 +116,12 @@ func main() {
 
 // ConfigurationFile holds which set of sprites/tiles we are using - currently
 // "ascii" or "graphic". It defines the maximum number of rooms we will attempt
-// to place when generating the dungeon, and the minimum and maximum sizes
-// for a room.
+// to place when generating the dungeon, the minimum number of rooms we will
+// accept, and the minimum and maximum sizes for a room.
 type ConfigurationFile struct {
 	Tileset        string `json:"tileset"`
 	RoomsMax       int    `json:"roomsMax"`
+	RoomsMin       int    `json:"roomsMin"`
 	RoomsWidthMin  int    `json:"roomsWidthMin"`
 	RoomsWidthMax  int    `json:"roomsWidthMax"`
 	RoomsHeightMin int    `json:"roomsHeightMin"`

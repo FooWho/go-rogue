@@ -1,7 +1,7 @@
 package engine
 
 // Entity is the base structure for all entities in the game. They have a
-// [Point] for location, a name, a sprite name, a sprite ID,and a [Behavior].
+// [Point] for location, a name, a sprite name, a sprite ID, and a [Behavior].
 // Currently, we only have two kinds of entities, the player and the npc and
 // the npc isn't really different from a player, other than we don't read any
 // input for it. Eventually there will be more complicated structures as we
@@ -37,8 +37,9 @@ type PlayerControl struct{}
 // GetAction for the player uses the [Game] struct's input field to read the
 // player's intention. First check if the player wants to quit, indicated by
 // having pushed the escape key. If not, check if the player wants to move,
-// indicated by having pushed one of the arrow keys, wasd or numpad keys.
-// If so, return the a [MovementAction] with the correct directional [Vector].
+// indicated by having pushed one of the arrow keys, wasd, or the numpad keys
+// (to allow for diagonal movement). If so, return the [MovementAction] with
+// the correct directional [Vector].
 func (p *PlayerControl) GetAction(g *Game, e *Entity) Action {
 	if g.input.WantsToQuit() {
 		return &EscapeAction{}

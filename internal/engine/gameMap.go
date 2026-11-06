@@ -10,10 +10,10 @@ type Tile struct {
 	SpriteID    int
 }
 
-// GameMap is a cols*rows slice of [Tile] structs.  They are stored in one
-// dimension internally to ensure that the tiles are contiguous in memory.
-// It also holds a slice of [RectangularRoom] structs, define the rooms
-// that were created during the procedural map generation.
+// GameMap is a cols*rows slice of pointers to [Tile] structs.  They are stored
+// in one dimension internally to ensure that the tiles are contiguous in
+// memory. It also holds a slice of [RectangularRoom] structs, defining the
+// rooms that were created during the procedural map generation.
 type GameMap struct {
 	cols, rows int
 	tiles      []*Tile
@@ -61,6 +61,31 @@ func (gm *GameMap) IsTransparent(p Point) bool {
 	return gm.tiles[gm.GetIndex(p)].Transparent
 }
 
+// IsWall tests if the [Tile] at a [Point] in the [GameMap] is a type
+// of wall. If so, it returns true and if not it returns false.
+func (gm *GameMap) IsWall(p Point) bool {
+	if !gm.InBounds(p) {
+		return false
+	}
+	t := gm.tiles[gm.GetIndex(p)]
+
+	return (t == wallTL ||
+		t == wallTR ||
+		t == wallBR ||
+		t == wallBL ||
+		t == wallHoriz ||
+		t == wallVert ||
+		t == wallTRight ||
+		t == wallTDown ||
+		t == wallTLeft ||
+		t == wallTUp ||
+		t == wall4Way ||
+		t == wallCapUp ||
+		t == wallCapRight ||
+		t == wallCapDown ||
+		t == wallCapLeft)
+}
+
 // MapViewer exposes the methods needed to read the [GameMap] and prevents it
 // from being altered.
 type MapViewer interface {
@@ -86,10 +111,11 @@ func (gm *GameMap) GetTileAt(p Point) Tile {
 }
 
 // RoomConfiguration stores the maximum number of rooms we will attempt to
-// create for a map, the minimum and maximum width of a room, and the
-// minimum and maximum height for a room.
+// create for a map, the minimum number of rooms we will accept, the minimum
+// and maximum width of a room, and the minimum and maximum height for a room.
 type RoomConfiguration struct {
 	RoomsMax       int
+	RoomsMin       int
 	RoomsWidthMin  int
 	RoomsWidthMax  int
 	RoomsHeightMin int
