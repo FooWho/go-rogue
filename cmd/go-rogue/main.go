@@ -49,8 +49,6 @@ var _ ebiten.Game = (*GameRunner)(nil)
 const (
 	gameCols = 80
 	gameRows = 50
-	playerX  = (gameCols / 2)
-	playerY  = (gameRows / 2)
 )
 
 func main() {
@@ -70,14 +68,12 @@ func main() {
 		log.Fatal(err)
 	}
 	player := &engine.Entity{
-		Loc:        engine.Point{X: playerX, Y: playerY},
 		Name:       "player",
 		SpriteName: "player",
 		SpriteID:   namesToIDs["player"],
 		Behavior:   &engine.PlayerControl{},
 	}
 	npc := &engine.Entity{
-		Loc:        engine.Point{X: gameCols/2 - 7, Y: gameRows / 2},
 		Name:       "monster",
 		SpriteName: "monster",
 		SpriteID:   namesToIDs["monster"],
