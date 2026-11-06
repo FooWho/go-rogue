@@ -37,38 +37,35 @@ type Sprite struct {
 type SpriteSheet []*Sprite
 
 // Renderer contains the data needed to draw the screen when the game state
-// updates. The [SpriteSheet] is loaded via the [NewRenderer] function. The
-// whiteTile field is used to tint sprites and is held here so it
-// doesn't need to be recreated constantly.
+// updates. The [SpriteSheet] is loaded via the [NewRenderer] function.
 type Renderer struct {
 	name                       string
 	spriteSheet                SpriteSheet
-	whiteTile                  *ebiten.Image
 	tileWidth, tileHeight      int
 	viewportCols, viewportRows int
 }
 
 // NewRenderer initializes the [Renderer] struct with the appropriate values.
-// spriteSheetName is used to load the appropriate SpriteSheet from the
-// embedded files in the assets package. tileWidth and tileHeight specify the
-// size of the tiles in pixels. viewportCols and viewportRows are the size of
-// the viewable area in terms of tiles.
+// tilesetName is used to load the appropriate SpriteSheet from the
+// embedded files in the assets package. viewportCols and viewportRows are the
+// size of the viewable area in terms of tiles.
 func NewRenderer(
 	viewportCols, viewportRows int, tilesetName string,
 ) (*Renderer, map[string]int, error) {
 
 	assetConfigurationSet, err := loadAssetConfigurationSet()
-	assetConfiguration := assetConfigurationSet[tilesetName]
-	spriteSheet, namesToIDs, err := loadTileset(assetConfiguration)
-	engine.BindTileSpriteIDs(namesToIDs)
 	if err != nil {
 		return nil, nil, err
 	}
+	assetConfiguration := assetConfigurationSet[tilesetName]
+	spriteSheet, namesToIDs, err := loadTileset(assetConfiguration)
+	if err != nil {
+		return nil, nil, err
+	}
+	engine.BindTileSpriteIDs(namesToIDs)
 	ebiten.SetWindowSize(1280, 800)
 	ebiten.SetWindowTitle("Go Rogue!")
-	whiteTile := spriteSheet[namesToIDs["whiteTile"]].Img
 	return &Renderer{spriteSheet: spriteSheet,
-			whiteTile:    whiteTile,
 			tileWidth:    assetConfiguration.TileWidth,
 			tileHeight:   assetConfiguration.TileHeight,
 			viewportCols: viewportCols,
@@ -78,7 +75,7 @@ func NewRenderer(
 		nil
 }
 
-// Draw is called to render he current frame. It obtains a [engine.MapViewer]
+// Draw is called to render the current frame. It obtains a [engine.MapViewer]
 // to examine the [engine.Tile]s in the [engine.GameMap] and draws the sprite
 // for each [engine.Tile]. It then loops over the [engine.Entity] structs
 // and draws them in the same manner.
