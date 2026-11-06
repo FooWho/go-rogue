@@ -13,6 +13,24 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// spriteConfig defines the raw asset configuration parsed from assets.json.
+// It is used strictly during asset loading and discarded afterward.
+type spriteConfig struct {
+	ImageLoc engine.Point `json:"imageLoc"`
+	Color    color.NRGBA  `json:"color"`
+	Rotation float64      `json:"rotation"`
+}
+
+// Sprite is the graphical representation for map tiles and entity sprites.
+// A sprite holds the image (which is actually a sub-image from the
+// SpriteSheet), the pre-calculated [ebiten.ColorScale], and the
+// precalculated [ebiten.GeoM].
+type Sprite struct {
+	Img        *ebiten.Image
+	ColorScale ebiten.ColorScale
+	GeoM       ebiten.GeoM
+}
+
 // SpriteSheet is a slice for holding asset images. The images
 // are extracted from one large sprite sheet during the construction of the
 // [Renderer].
@@ -34,9 +52,7 @@ type Renderer struct {
 // spriteSheetName is used to load the appropriate SpriteSheet from the
 // embedded files in the assets package. tileWidth and tileHeight specify the
 // size of the tiles in pixels. viewportCols and viewportRows are the size of
-// the viewable area in terms of tiles. Currently, [GameMap] and the actual
-// window need to match in size. This will eventually be changed to allow for
-// arbitrary map sizes with the window acting as a viewport onto the map.
+// the viewable area in terms of tiles.
 func NewRenderer(
 	viewportCols, viewportRows int, tilesetName string,
 ) (*Renderer, map[string]int, error) {
@@ -62,11 +78,10 @@ func NewRenderer(
 		nil
 }
 
-// Draw is called 60 times per second and performs the screen
-// refresh. It obtains a [engine.MapViewer] to examine the
-// [engine.Tile]s in the [engine.GameMap] and draws the sprite (if not
-// completely transparent) for each [engine.Tile]. It then loops over
-// the [engine.Entity] structs and draws them in the same manner.
+// Draw is called to render he current frame. It obtains a [engine.MapViewer]
+// to examine the [engine.Tile]s in the [engine.GameMap] and draws the sprite
+// for each [engine.Tile]. It then loops over the [engine.Entity] structs
+// and draws them in the same manner.
 func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 	op := &ebiten.DrawImageOptions{}
 
@@ -114,11 +129,13 @@ func (r *Renderer) Layout(
 
 // loadTileset creates a [SpriteSheet] from a PNG in the embedded filesystem.
 // Sprites are loaded using the definitions from assets.json, also contained in
-// the embedded file system. Sprites are rotated and color tinted according to
-// those definitions so the [Draw] method doesn't have to perform any of that.
-func loadTileset(assetConfiguration AssetConfiguration) (SpriteSheet, map[string]int, error) {
-	tileset := make([]*Sprite, 0)
-	namesToIDs := make(map[string]int)
+// the embedded file system. Sprites rotations and color scale are pre-calculated
+// according to those definitions so the [Draw] method doesn't have to perform
+// any of that.
+func loadTileset(
+	assetConfiguration AssetConfiguration) (SpriteSheet, map[string]int, error) {
+	tileset := make([]*Sprite, len(assetConfiguration.AssetTilesMap))
+	namesToIDs := make(map[string]int, len(assetConfiguration.AssetTilesMap))
 	spriteSheetFile, err := assets.AssetsFS.ReadFile(
 		assetConfiguration.FileName,
 	)
@@ -150,13 +167,9 @@ func loadTileset(assetConfiguration AssetConfiguration) (SpriteSheet, map[string
 			tmpSprite.GeoM.Rotate(math.Pi * tmpSpriteConfig.Rotation)
 			tmpSprite.GeoM.Translate(halfW, halfH)
 		}
-		tmpSprite.ColorScale.Scale(
-			float32(tmpSpriteConfig.Color.R)/255.0,
-			float32(tmpSpriteConfig.Color.G)/255.0,
-			float32(tmpSpriteConfig.Color.B)/255.0,
-			float32(tmpSpriteConfig.Color.A)/255.0,
-		)
-		tileset = append(tileset, &tmpSprite)
+		tmpSprite.ColorScale.ScaleWithColor(tmpSpriteConfig.Color)
+
+		tileset[i] = &tmpSprite
 		namesToIDs[k] = i
 		i++
 	}
@@ -191,21 +204,4 @@ func loadAssetConfigurationSet() (AssetConfigurationSet, error) {
 		return nil, err
 	}
 	return assetConfigurationSet, nil
-}
-
-// spriteConfig defines the raw asset configuration parsed from assets.json.
-// It is used strictly during asset loading and discarded afterward.
-type spriteConfig struct {
-	ImageLoc engine.Point `json:"imageLoc"`
-	Color    color.NRGBA  `json:"color"`
-	Rotation float64      `json:"rotation"`
-}
-
-// Sprite is the graphical representation for map tiles and entity sprites.
-// A sprite defines where it is positionally within the sprite sheet, what color
-// to tint it, how to rotate it, and the
-type Sprite struct {
-	Img        *ebiten.Image
-	ColorScale ebiten.ColorScale
-	GeoM       ebiten.GeoM
 }

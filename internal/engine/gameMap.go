@@ -85,6 +85,9 @@ func (gm *GameMap) GetTileAt(p Point) Tile {
 	return *gm.tiles[gm.GetIndex(p)]
 }
 
+// RoomConfiguration stores the maximum number of rooms we will attempt to
+// create for a map, the minimum and maximum width of a room, and the
+// minimum and maximum height for a room.
 type RoomConfiguration struct {
 	RoomsMax       int
 	RoomsWidthMin  int

@@ -8,23 +8,22 @@ import (
 // Game represents the game state. It holds a reference to the player and a
 // slice for the [Entity] structs. The player is included in this slice
 // as the first element. It also has a map to convert a SpriteName to a
-// SpriteID, a pointer to the [GameMap] struct, the [Input] handler, and
-// the runtime configuration.
+// SpriteID, a pointer to the [GameMap] struct, and the [Input] handler.
 type Game struct {
-	player     *Entity
-	entities   []*Entity
-	namesToIDs map[string]int
-	gameMap    *GameMap
-	input      Input
-	//config     ConfigurationFile
+	player            *Entity
+	entities          []*Entity
+	namesToIDs        map[string]int
+	gameMap           *GameMap
+	roomConfiguration RoomConfiguration
+	input             Input
 }
 
 // NewGame creates and initializes a new [Game] struct. We currently only have
 // one [GameMap] and so the size of the map is passed in for the game to
 // initialize it. This will certainly change at some point, because we
 // want to support multiple maps eventually. We also pass in a pointer to the
-// [Entity] for the player and a slice of pointer to [Entity] for the NPCs.
-// It has the handler for [Input], the [ConfigurationFile], and a map to
+// [Entity] for the player and a slice of pointers to [Entity] for the NPCs.
+// It has the handler for [Input], a [RoomConfiguration], and a map to
 // convert sprite names to sprite IDs.
 func NewGame(
 	mapWidth, mapHeight int,
@@ -36,11 +35,12 @@ func NewGame(
 ) (*Game, error) {
 
 	game := &Game{
-		player:   player,
-		entities: append([]*Entity{player}, npcs...),
-		gameMap:  NewGameMap(mapWidth, mapHeight, roomsConfig),
-		input:    input,
-		//config:   config,
+		player:            player,
+		entities:          append([]*Entity{player}, npcs...),
+		namesToIDs:        namesToIDs,
+		gameMap:           NewGameMap(mapWidth, mapHeight, roomsConfig),
+		roomConfiguration: roomsConfig,
+		input:             input,
 	}
 	return game, nil
 }
