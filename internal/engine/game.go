@@ -25,6 +25,8 @@ type Game struct {
 // [Entity] for the player and a slice of pointers to [Entity] for the NPCs.
 // It has the handler for [Input], a [RoomConfiguration], and a map to
 // convert sprite names to sprite IDs.
+// After the game map is created, place the player in the center of room 0 and
+// the monster in the center of the last room.
 func NewGame(
 	mapWidth, mapHeight int,
 	player *Entity,
@@ -42,6 +44,9 @@ func NewGame(
 		roomConfiguration: roomsConfig,
 		input:             input,
 	}
+	player.Loc = game.gameMap.rooms[0].Center()
+	game.entities[1].Loc = game.gameMap.rooms[len(game.gameMap.rooms)-1].Center()
+
 	return game, nil
 }
 
