@@ -258,7 +258,7 @@ func (gm *GameMap) MakeWalls() {
 		for x := range gm.cols {
 			p := Point{X: x, Y: y}
 			i := gm.GetIndex(p)
-			if gm.tiles[i] != floor && gm.touchesFloor(p) {
+			if gm.tiles[i] == bedrock && gm.touchesFloor(p) {
 				gm.tiles[i] = wallHoriz
 			}
 		}
