@@ -71,22 +71,18 @@ func (gm *GameMap) GenerateDungeon(roomConfig RoomConfiguration) {
 			roomConfig.RoomsHeightMin
 		x := rand.N(gm.cols - roomWidth - 1)
 		y := rand.N(gm.rows - roomHeight - 1)
+		candidateRoom := RectangularRoom{
+			topLeft:     Point{X: x, Y: y},
+			bottomRight: Point{X: x + roomWidth, Y: y + roomHeight},
+		}
 		for i := range gm.rooms {
-			if gm.rooms[i].Overlap(
-				RectangularRoom{
-					topLeft:     Point{X: x, Y: y},
-					bottomRight: Point{X: x + roomWidth, Y: y + roomHeight},
-				},
-			) {
+			if gm.rooms[i].Overlap(candidateRoom) {
 				overlap = true
 				break
 			}
 		}
 		if !overlap {
-			gm.NewRectangularRoom(
-				Point{X: x, Y: y},
-				Point{X: x + roomWidth, Y: y + roomHeight},
-			)
+			gm.NewRectangularRoom(candidateRoom.topLeft, candidateRoom.bottomRight)
 		}
 		overlap = false
 	}
