@@ -54,10 +54,7 @@ func (i *EbitenInput) WantsToMove() engine.Vector {
 
 // WantsToQuit tests if the player has hit the escape key.
 func (i *EbitenInput) WantsToQuit() bool {
-	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
-		return true
-	}
-	return false
+	return inpututil.IsKeyJustPressed(ebiten.KeyEscape)
 }
 
 // Interface Guard
