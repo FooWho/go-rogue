@@ -61,10 +61,10 @@ func (gm *GameMap) InBounds(p Point) bool {
 	return 0 <= p.X && p.X < gm.cols && 0 <= p.Y && p.Y < gm.rows
 }
 
-// Walkable tests if the [Tile] at [Point] is walkable. It is a helper
+// IsWalkable tests if the [Tile] at [Point] is walkable. It is a helper
 // so that [GetIndex] doesn't have to be called in other places and we
 // can operate directly on a [Point].
-func (gm *GameMap) Walkable(p Point) bool {
+func (gm *GameMap) IsWalkable(p Point) bool {
 	return gm.tiles[gm.GetIndex(p)].Walkable
 }
 
