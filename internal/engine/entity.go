@@ -36,8 +36,8 @@ type PlayerControl struct{}
 // GetAction for the player uses the [Game] struct's input field to read the
 // player's intention. First check if the player wants to quit, indicated by
 // having pushed the escape key. If not, check if the player wants to move,
-// indicated by having pushed one of the arrow keys or wasd. If so, return
-// the a [MovementAction] with the correct directional [Vector].
+// indicated by having pushed one of the arrow keys, wasd or numpad keys.
+// If so, return the a [MovementAction] with the correct directional [Vector].
 func (p *PlayerControl) GetAction(g *Game, e *Entity) Action {
 	if g.input.WantsToQuit() {
 		return &EscapeAction{}
