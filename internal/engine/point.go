@@ -2,10 +2,11 @@ package engine
 
 // Point is a standard X, Y for the 2D Grid.
 type Point struct {
-	X, Y int
+	X int `json:"x"`
+	Y int `json:"y"`
 }
 
-// Vector is just a [Point] under the hood, but use it to provide sematic
+// Vector is just a [Point] under the hood, but use it to provide semantic
 // clarity. For example, if [Entity] e needs to move 3 tiles west:
 // e.Move(Vector{-1,0}.Mul(3))
 type Vector = Point
