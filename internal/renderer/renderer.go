@@ -39,7 +39,6 @@ type SpriteSheet []*Sprite
 // Renderer contains the data needed to draw the screen when the game state
 // updates. The [SpriteSheet] is loaded via the [NewRenderer] function.
 type Renderer struct {
-	name                       string
 	spriteSheet                SpriteSheet
 	tileWidth, tileHeight      int
 	viewportCols, viewportRows int
