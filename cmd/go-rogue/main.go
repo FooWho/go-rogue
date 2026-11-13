@@ -46,11 +46,6 @@ func (g *GameRunner) Layout(outsideWidth, outsideHeight int) (int, int) {
 // Interface Guard
 var _ ebiten.Game = (*GameRunner)(nil)
 
-const (
-	gameCols = 80
-	gameRows = 50
-)
-
 func main() {
 	configurationFile, err := assets.AssetsFS.ReadFile("configuration.json")
 	if err != nil {
@@ -63,7 +58,12 @@ func main() {
 	}
 	input := &EbitenInput{}
 
-	renderer, namesToIDs, err := renderer.NewRenderer(gameCols, gameRows, config.Tileset)
+	renderer, namesToIDs, err :=
+		renderer.NewRenderer(
+			config.ViewPortCols,
+			config.ViewPortRows,
+			config.Tileset,
+		)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,8 +89,8 @@ func main() {
 		RoomsHeightMax: config.RoomsHeightMax,
 	}
 	game, err := engine.NewGame(
-		gameCols,
-		gameRows,
+		config.ViewPortCols,
+		config.ViewPortRows,
 		player,
 		npcs,
 		input,
@@ -116,6 +116,8 @@ func main() {
 // accept, and the minimum and maximum sizes for a room.
 type ConfigurationFile struct {
 	Tileset        string `json:"tileset"`
+	ViewPortCols   int    `json:"viewPortCols"`
+	ViewPortRows   int    `json:"viewPortRows"`
 	RoomsMax       int    `json:"roomsMax"`
 	RoomsMin       int    `json:"roomsMin"`
 	RoomsWidthMin  int    `json:"roomsWidthMin"`
