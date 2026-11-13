@@ -1,7 +1,7 @@
 {
     "tileset": "graphic",
-    "viewportCols": 80,
-    "viewportRows": 50,
+    "viewPortCols": 80,
+    "viewPortRows": 50,
     "roomsMax": 100,
     "roomsMin": 3,
     "roomsWidthMin": 5,
