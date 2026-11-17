@@ -67,7 +67,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	player := &engine.Entity_old{
+
+	world := engine.NewWorld()
+
+	/*player := &engine.Entity_old{
 		Name:       "player",
 		SpriteName: "player",
 		SpriteID:   namesToIDs["player"],
@@ -79,7 +82,7 @@ func main() {
 		SpriteID:   namesToIDs["monster"],
 		Behavior:   nil,
 	}
-	npcs := []*engine.Entity_old{npc}
+	npcs := []*engine.Entity_old{npc}*/
 	roomsConfig := engine.RoomConfiguration{
 		RoomsMax:       config.RoomsMax,
 		RoomsMin:       config.RoomsMin,
@@ -89,10 +92,9 @@ func main() {
 		RoomsHeightMax: config.RoomsHeightMax,
 	}
 	game, err := engine.NewGame(
+		world,
 		config.ViewPortCols,
 		config.ViewPortRows,
-		player,
-		npcs,
 		input,
 		roomsConfig,
 		namesToIDs,

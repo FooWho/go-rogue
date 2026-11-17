@@ -2,7 +2,6 @@ package engine
 
 import (
 	"errors"
-	"fmt"
 )
 
 // Game represents the game state. It holds a reference to the player and a
@@ -10,12 +9,30 @@ import (
 // as the first element. It also has a map to convert a SpriteName to a
 // SpriteID, a pointer to the [GameMap] struct, and the [Input] handler.
 type Game struct {
-	player            *Entity_old
-	entities          []*Entity_old
+	world             *World
+	player            Entity
 	namesToIDs        map[string]int
 	gameMap           *GameMap
 	roomConfiguration RoomConfiguration
 	input             Input
+}
+
+type Renderable struct {
+	Position Position
+	SpriteID int
+}
+
+func (g *Game) GetRenderables() []Renderable {
+	renderables := make([]Renderable, 0, len(g.world.Visuals))
+	for k, spriteID := range g.world.Visuals {
+		if pos, ok := g.world.Positions[k]; ok {
+			renderables = append(renderables, Renderable{
+				Position: pos,
+				SpriteID: spriteID,
+			})
+		}
+	}
+	return renderables
 }
 
 // NewGame creates and initializes a new [Game] struct. We currently only have
@@ -28,25 +45,24 @@ type Game struct {
 // After the [gameMap] is created, place the player in the center of room 0 and
 // the monster in the center of the last room.
 func NewGame(
+	world *World,
 	mapWidth, mapHeight int,
-	player *Entity_old,
-	npcs []*Entity_old,
 	input Input,
 	roomsConfig RoomConfiguration,
 	namesToIDs map[string]int,
 ) (*Game, error) {
 
 	game := &Game{
-		player:            player,
-		entities:          append([]*Entity_old{player}, npcs...),
+		world:             world,
+		player:            world.CreateEntity(),
 		namesToIDs:        namesToIDs,
 		gameMap:           NewGameMap(mapWidth, mapHeight, roomsConfig),
 		roomConfiguration: roomsConfig,
 		input:             input,
 	}
-	player.Loc = game.gameMap.rooms[0].Center()
-	game.entities[1].Loc = game.gameMap.rooms[len(game.gameMap.rooms)-1].Center()
-
+	world.Positions[game.player] = Position(game.gameMap.rooms[0].Center())
+	world.Visuals[game.player] = namesToIDs["player"]
+	world.PlayerControlled[game.player] = PlayerControlled{}
 	return game, nil
 }
 
@@ -56,12 +72,12 @@ func NewGame(
 // the action was not allowed, for example, the player can't walk through
 // a wall.
 func (g *Game) Update() error {
-	action := g.player.Behavior.GetAction(g, g.player)
+	/*action := g.player_old.Behavior.GetAction(g, g.player_old)
 	if action == nil {
 		return nil
 	}
 
-	err := action.Perform(g, g.player)
+	err := action.Perform(g, g.player_old)
 	if err != nil {
 		var impErr *ImpossibleActionError
 		if errors.As(err, &impErr) {
@@ -69,7 +85,7 @@ func (g *Game) Update() error {
 			return nil
 		}
 		return err
-	}
+	}*/
 	return nil
 }
 
@@ -79,19 +95,6 @@ func (g *Game) Update() error {
 // which allows a copy of a [GameMap] [Tile] to be accessed.
 func (g *Game) Map() MapViewer {
 	return g.gameMap
-}
-
-// Entities is the encapsulation of entities in the [Game]. Other packages
-// may need access to the entities, but they should not be modified outside
-// of this package.
-func (g *Game) Entities() []Entity_old {
-	copies := make([]Entity_old, len(g.entities))
-
-	for i, e := range g.entities {
-		copies[i] = *e
-	}
-
-	return copies
 }
 
 // Input is an interface to read player intention. This interface is used

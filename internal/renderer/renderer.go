@@ -98,14 +98,12 @@ func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 			screen.DrawImage(visual.Img, op)
 		}
 	}
-
-	for _, entity := range gameEngine.Entities() {
-		visual := r.spriteSheet[entity.SpriteID]
-
+	for _, v := range gameEngine.GetRenderables() {
+		visual := r.spriteSheet[v.SpriteID]
 		op.GeoM = visual.GeoM
 		op.GeoM.Translate(
-			float64(entity.Loc.X)*tileWidth,
-			float64(entity.Loc.Y)*tileHeight,
+			float64(v.Position.X)*tileWidth,
+			float64(v.Position.Y)*tileHeight,
 		)
 		op.ColorScale = visual.ColorScale
 		screen.DrawImage(visual.Img, op)
