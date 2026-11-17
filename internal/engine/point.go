@@ -7,9 +7,9 @@ type Point struct {
 }
 
 // Vector is just a [Point] under the hood, but use it to provide semantic
-// clarity. For example, if [Entity] e needs to move 3 tiles west:
+// clarity. For example, if [Entity_old] e needs to move 3 tiles west:
 // e.Move(Vector{-1,0}.Mul(3))
-type Vector = Point
+type Vector Point
 
 // Add is used to apply a direction [Vector] to a [Point], resulting
 // in a new [Point].

@@ -6,12 +6,12 @@ import (
 )
 
 // Game represents the game state. It holds a reference to the player and a
-// slice for the [Entity] structs. The player is included in this slice
+// slice for the [Entity_old] structs. The player is included in this slice
 // as the first element. It also has a map to convert a SpriteName to a
 // SpriteID, a pointer to the [GameMap] struct, and the [Input] handler.
 type Game struct {
-	player            *Entity
-	entities          []*Entity
+	player            *Entity_old
+	entities          []*Entity_old
 	namesToIDs        map[string]int
 	gameMap           *GameMap
 	roomConfiguration RoomConfiguration
@@ -22,15 +22,15 @@ type Game struct {
 // one [GameMap] and so the size of the map is passed in for the game to
 // initialize it. This will certainly change at some point, because we
 // want to support multiple maps eventually. We also pass in a pointer to the
-// [Entity] for the player and a slice of pointers to [Entity] for the NPCs.
+// [Entity_old] for the player and a slice of pointers to [Entity_old] for the NPCs.
 // It has the handler for [Input], a [RoomConfiguration], and a map to
 // convert sprite names to sprite IDs.
 // After the [gameMap] is created, place the player in the center of room 0 and
 // the monster in the center of the last room.
 func NewGame(
 	mapWidth, mapHeight int,
-	player *Entity,
-	npcs []*Entity,
+	player *Entity_old,
+	npcs []*Entity_old,
 	input Input,
 	roomsConfig RoomConfiguration,
 	namesToIDs map[string]int,
@@ -38,7 +38,7 @@ func NewGame(
 
 	game := &Game{
 		player:            player,
-		entities:          append([]*Entity{player}, npcs...),
+		entities:          append([]*Entity_old{player}, npcs...),
 		namesToIDs:        namesToIDs,
 		gameMap:           NewGameMap(mapWidth, mapHeight, roomsConfig),
 		roomConfiguration: roomsConfig,
@@ -51,7 +51,7 @@ func NewGame(
 }
 
 // Update is called for the game state to update. Currently, it gets an
-// [Action] from the [Entity] struct's [Behavior.GetAction] method
+// [Action] from the [Entity_old] struct's [Behavior.GetAction] method
 // and attempts to [Action.Perform] it. [ImpossibleActionError] indicates
 // the action was not allowed, for example, the player can't walk through
 // a wall.
@@ -84,8 +84,8 @@ func (g *Game) Map() MapViewer {
 // Entities is the encapsulation of entities in the [Game]. Other packages
 // may need access to the entities, but they should not be modified outside
 // of this package.
-func (g *Game) Entities() []Entity {
-	copies := make([]Entity, len(g.entities))
+func (g *Game) Entities() []Entity_old {
+	copies := make([]Entity_old, len(g.entities))
 
 	for i, e := range g.entities {
 		copies[i] = *e
@@ -110,7 +110,7 @@ type Input interface {
 // the game.
 var ErrQuit = errors.New("player requested quit")
 
-// ImpossibleActionError is used to indicate an [Entity] tried to
+// ImpossibleActionError is used to indicate an [Entity_old] tried to
 // [Action.Perform] an [Action] that wasn't allowed, for example walk
 // through a wall.
 type ImpossibleActionError struct {

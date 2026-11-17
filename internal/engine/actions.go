@@ -1,9 +1,9 @@
 package engine
 
-// Action is the interface for an [Entity] to affect the game state.
+// Action is the interface for an [Entity_old] to affect the game state.
 // There are only two actions presently, but this will be expanded.
 type Action interface {
-	Perform(g *Game, e *Entity) error
+	Perform(g *Game, e *Entity_old) error
 }
 
 // EscapeAction is an empty struct that is used to signal that the player
@@ -12,7 +12,7 @@ type EscapeAction struct{}
 
 // Perform for an [EscapeAction] just returns a sentinel indicating the game
 // should be shut down.
-func (ea *EscapeAction) Perform(g *Game, e *Entity) error {
+func (ea *EscapeAction) Perform(g *Game, e *Entity_old) error {
 	return ErrQuit
 }
 
@@ -24,9 +24,9 @@ type MovementAction struct{ Direction Vector }
 
 // Perform for a [MovementAction] tests if the move is legal. If the move
 // is not legal, an error is returned indicating why. If the move is legal
-// the [Entity.Move] method for the [Entity] is called with the appropriate
+// the [Entity_old.Move] method for the [Entity_old] is called with the appropriate
 // direction [Vector].
-func (ma *MovementAction) Perform(g *Game, e *Entity) error {
+func (ma *MovementAction) Perform(g *Game, e *Entity_old) error {
 	destination := e.Loc.Add(ma.Direction)
 	if !g.gameMap.InBounds(destination) {
 		return &ImpossibleActionError{

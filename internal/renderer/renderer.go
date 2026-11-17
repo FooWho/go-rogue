@@ -76,7 +76,7 @@ func NewRenderer(
 
 // Draw is called to render the current frame. It obtains a [engine.MapViewer]
 // to examine the [engine.Tile]s in the [engine.GameMap] and draws the sprite
-// for each [engine.Tile]. It then loops over the [engine.Entity] structs
+// for each [engine.Tile]. It then loops over the [engine.Entity_old] structs
 // and draws them in the same manner.
 func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 	op := &ebiten.DrawImageOptions{}
