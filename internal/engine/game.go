@@ -2,6 +2,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 )
 
 // Game represents the game state. It holds a reference to the player and a
@@ -11,6 +12,7 @@ import (
 type Game struct {
 	world             *World
 	player            Entity
+	renderables       []Renderable
 	namesToIDs        map[string]int
 	gameMap           *GameMap
 	roomConfiguration RoomConfiguration
@@ -23,16 +25,16 @@ type Renderable struct {
 }
 
 func (g *Game) GetRenderables() []Renderable {
-	renderables := make([]Renderable, 0, len(g.world.Visuals))
+	g.renderables = g.renderables[:0]
 	for k, spriteID := range g.world.Visuals {
 		if pos, ok := g.world.Positions[k]; ok {
-			renderables = append(renderables, Renderable{
+			g.renderables = append(g.renderables, Renderable{
 				Position: pos,
 				SpriteID: spriteID,
 			})
 		}
 	}
-	return renderables
+	return g.renderables
 }
 
 // NewGame creates and initializes a new [Game] struct. We currently only have
@@ -55,6 +57,7 @@ func NewGame(
 	game := &Game{
 		world:             world,
 		player:            world.CreateEntity(),
+		renderables:       make([]Renderable, 0, 1000),
 		namesToIDs:        namesToIDs,
 		gameMap:           NewGameMap(mapWidth, mapHeight, roomsConfig),
 		roomConfiguration: roomsConfig,
@@ -72,20 +75,21 @@ func NewGame(
 // the action was not allowed, for example, the player can't walk through
 // a wall.
 func (g *Game) Update() error {
-	/*action := g.player_old.Behavior.GetAction(g, g.player_old)
-	if action == nil {
+	button, err := g.world.InputSystem(g.input)
+	if err != nil {
+		return err
+	}
+	if !button {
 		return nil
 	}
-
-	err := action.Perform(g, g.player_old)
+	err = g.world.MovementSystem(g.gameMap)
 	if err != nil {
-		var impErr *ImpossibleActionError
-		if errors.As(err, &impErr) {
-			fmt.Println(impErr.Reason)
-			return nil
-		}
 		return err
-	}*/
+	}
+	for k := range g.world.Messages {
+		fmt.Printf("%s\n", g.world.Messages[k])
+	}
+	g.world.Messages = g.world.Messages[:0]
 	return nil
 }
 
@@ -105,7 +109,7 @@ func (g *Game) Map() MapViewer {
 //
 // [Ebitengine]: https://pkg.go.dev/github.com/hajimehoshi/ebiten/v2
 type Input interface {
-	WantsToMove() (direction Vector)
+	WantsToMove() (Vector, bool)
 	WantsToQuit() bool
 }
 
