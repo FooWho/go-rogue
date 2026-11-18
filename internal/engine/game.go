@@ -66,6 +66,8 @@ func NewGame(
 	world.Positions[game.player] = Position(game.gameMap.rooms[0].Center())
 	world.Visuals[game.player] = namesToIDs["player"]
 	world.PlayerControlled[game.player] = PlayerControlled{}
+	world.Viewshed[game.player] = NewViewshed(5, TintTorchlight)
+	world.VisibilitySystem(game.gameMap)
 	return game, nil
 }
 
@@ -84,6 +86,7 @@ func (g *Game) Update() error {
 		if err != nil {
 			return err
 		}
+		g.world.VisibilitySystem(g.gameMap)
 		/* Other systems run here
 		err = g.world.AnimationSystem()
 		if err != nil {
@@ -110,6 +113,15 @@ func (g *Game) Update() error {
 // which allows a copy of a [GameMap] [Tile] to be accessed.
 func (g *Game) Map() MapViewer {
 	return g.gameMap
+}
+
+func (g *Game) PlayerViewshed() (VisionTint, bool) {
+
+	if v, ok := g.world.Viewshed[g.player]; ok {
+		return v.VisionTint, true
+	} else {
+		return VisionTint{}, false
+	}
 }
 
 // Input is an interface to read player intention. This interface is used

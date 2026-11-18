@@ -39,7 +39,9 @@ type SpriteSheet []*Sprite
 // Renderer contains the data needed to draw the screen when the game state
 // updates. The [SpriteSheet] is loaded via the [NewRenderer] function.
 type Renderer struct {
-	spriteSheet                SpriteSheet
+	spriteSheet SpriteSheet
+	//visibleTint                [4]float32
+	//exploredTint               [4]float32
 	tileWidth, tileHeight      int
 	viewportCols, viewportRows int
 }
@@ -64,7 +66,8 @@ func NewRenderer(
 	engine.BindTileSpriteIDs(namesToIDs)
 	ebiten.SetWindowSize(1280, 800)
 	ebiten.SetWindowTitle("Go Rogue!")
-	return &Renderer{spriteSheet: spriteSheet,
+	return &Renderer{
+			spriteSheet:  spriteSheet,
 			tileWidth:    assetConfiguration.TileWidth,
 			tileHeight:   assetConfiguration.TileHeight,
 			viewportCols: viewportCols,
@@ -80,22 +83,33 @@ func NewRenderer(
 // and draws them in the same manner.
 func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 	op := &ebiten.DrawImageOptions{}
+	visibleTint := engine.TintDaylight
+	if vs, ok := gameEngine.PlayerViewshed(); ok {
+		visibleTint = vs
+	}
 
 	tileWidth := float64(r.tileWidth)
 	tileHeight := float64(r.tileHeight)
 
 	for y := 0; y < r.viewportRows; y++ {
 		for x := 0; x < r.viewportCols; x++ {
-			tile := gameEngine.Map().GetTileAt(engine.Point{X: x, Y: y})
-			visual := r.spriteSheet[tile.SpriteID]
+			tile, tileState := gameEngine.Map().GetTileAt(engine.Point{X: x, Y: y})
+			if tileState.Explored {
+				visual := r.spriteSheet[tile.SpriteID]
 
-			op.GeoM = visual.GeoM
-			op.GeoM.Translate(
-				float64(x)*tileWidth,
-				float64(y)*tileHeight,
-			)
-			op.ColorScale = visual.ColorScale
-			screen.DrawImage(visual.Img, op)
+				op.GeoM = visual.GeoM
+				op.GeoM.Translate(
+					float64(x)*tileWidth,
+					float64(y)*tileHeight,
+				)
+				op.ColorScale = visual.ColorScale
+				if tileState.Visible {
+					op.ColorScale.Scale(visibleTint[0], visibleTint[1], visibleTint[2], visibleTint[3])
+				} else {
+					op.ColorScale.Scale(engine.TintExplored[0], engine.TintExplored[1], engine.TintExplored[2], engine.TintExplored[3])
+				}
+				screen.DrawImage(visual.Img, op)
+			}
 		}
 	}
 	for _, v := range gameEngine.GetRenderables() {

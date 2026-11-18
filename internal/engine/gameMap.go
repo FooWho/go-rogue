@@ -10,6 +10,11 @@ type Tile struct {
 	SpriteID    int
 }
 
+type TileState struct {
+	Explored bool
+	Visible  bool
+}
+
 // GameMap is a cols*rows slice of pointers to [Tile] structs.  They are stored
 // in one dimension internally to ensure that the tiles are contiguous in
 // memory. It also holds a slice of [RectangularRoom] structs, defining the
@@ -17,7 +22,25 @@ type Tile struct {
 type GameMap struct {
 	cols, rows int
 	tiles      []*Tile
+	tileStates []TileState
 	rooms      []RectangularRoom
+}
+
+func (gm *GameMap) SetVisible(p Point, visible bool) {
+	if !gm.InBounds(p) {
+		return
+	}
+	i := gm.GetIndex(p)
+	gm.tileStates[i].Visible = visible
+	if visible {
+		gm.tileStates[i].Explored = true
+	}
+}
+
+func (gm *GameMap) ClearVisible() {
+	for i := range gm.tileStates {
+		gm.tileStates[i].Visible = false
+	}
 }
 
 // NewGameMap generates a map for us. It starts by filling the [GameMap] with
@@ -26,6 +49,7 @@ type GameMap struct {
 func NewGameMap(cols, rows int, roomsConfig RoomConfiguration) *GameMap {
 	gm := &GameMap{cols: cols, rows: rows}
 	gm.tiles = make([]*Tile, cols*rows)
+	gm.tileStates = make([]TileState, cols*rows)
 	for y := range rows {
 		for x := range cols {
 			gm.tiles[gm.GetIndex(Point{X: x, Y: y})] = bedrock
@@ -61,6 +85,14 @@ func (gm *GameMap) IsTransparent(p Point) bool {
 	return gm.tiles[gm.GetIndex(p)].Transparent
 }
 
+func (gm *GameMap) IsExplored(p Point) bool {
+	return gm.tileStates[gm.GetIndex(p)].Explored
+}
+
+func (gm *GameMap) IsVisible(p Point) bool {
+	return gm.tileStates[gm.GetIndex(p)].Visible
+}
+
 // IsWall tests if the [Tile] at a [Point] in the [GameMap] is a type
 // of wall. If so, it returns true and if not it returns false.
 func (gm *GameMap) IsWall(p Point) bool {
@@ -91,8 +123,18 @@ func (gm *GameMap) IsWall(p Point) bool {
 type MapViewer interface {
 	Width() int
 	Height() int
-	GetTileAt(p Point) Tile
+	IsWall(p Point) bool
+	IsWalkable(p Point) bool
+	IsTransparent(p Point) bool
+	IsVisible(p Point) bool
+	SetVisible(p Point, vis bool)
+	ClearVisible()
+	IsExplored(p Point) bool
+	InBounds(p Point) bool
+	GetTileAt(p Point) (Tile, TileState)
 }
+
+var _ MapViewer = (*GameMap)(nil)
 
 // Width returns the number of columns in the [GameMap].
 func (gm *GameMap) Width() int {
@@ -106,8 +148,8 @@ func (gm *GameMap) Height() int {
 
 // GetTileAt returns a copy of the [Tile] at the specified [Point] in the
 // [GameMap].
-func (gm *GameMap) GetTileAt(p Point) Tile {
-	return *gm.tiles[gm.GetIndex(p)]
+func (gm *GameMap) GetTileAt(p Point) (Tile, TileState) {
+	return *gm.tiles[gm.GetIndex(p)], gm.tileStates[gm.GetIndex(p)]
 }
 
 // RoomConfiguration stores the maximum number of rooms we will attempt to
