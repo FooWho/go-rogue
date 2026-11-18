@@ -79,12 +79,23 @@ func (g *Game) Update() error {
 	if err != nil {
 		return err
 	}
-	if !tookTurn {
-		return nil
-	}
-	err = g.world.MovementSystem(g.gameMap)
-	if err != nil {
-		return err
+	if tookTurn {
+		err = g.world.MovementSystem(g.gameMap)
+		if err != nil {
+			return err
+		}
+		/* Other systems run here
+		err = g.world.AnimationSystem()
+		if err != nil {
+			return err
+		}
+		err = g.world.CombatSystem()
+		if err != nil {
+			return err
+		}
+
+		etc...
+		*/
 	}
 	for k := range g.world.Messages {
 		fmt.Printf("%s\n", g.world.Messages[k])
