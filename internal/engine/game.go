@@ -75,11 +75,11 @@ func NewGame(
 // the action was not allowed, for example, the player can't walk through
 // a wall.
 func (g *Game) Update() error {
-	button, err := g.world.InputSystem(g.input)
+	tookTurn, err := g.world.InputSystem(g.input)
 	if err != nil {
 		return err
 	}
-	if !button {
+	if !tookTurn {
 		return nil
 	}
 	err = g.world.MovementSystem(g.gameMap)

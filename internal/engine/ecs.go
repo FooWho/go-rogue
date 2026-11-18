@@ -38,19 +38,17 @@ func (w *World) CreateEntity() Entity {
 
 // The Systems
 func (w *World) InputSystem(input Input) (bool, error) {
-	tookTurn := false
 	if input.WantsToQuit() {
-		tookTurn = true
-		return tookTurn, ErrQuit
+		return false, ErrQuit
 	}
 
 	if v, ok := input.WantsToMove(); ok {
-		tookTurn = true
 		for k := range w.PlayerControlled {
 			w.Velocities[k] = Velocity(v)
 		}
+		return true, nil
 	}
-	return tookTurn, nil
+	return false, nil
 }
 
 func (w *World) MovementSystem(gm *GameMap) error {
