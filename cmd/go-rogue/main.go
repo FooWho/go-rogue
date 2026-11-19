@@ -70,19 +70,6 @@ func main() {
 
 	world := engine.NewWorld()
 
-	/*player := &engine.Entity_old{
-		Name:       "player",
-		SpriteName: "player",
-		SpriteID:   namesToIDs["player"],
-		Behavior:   &engine.PlayerControl{},
-	}
-	npc := &engine.Entity_old{
-		Name:       "monster",
-		SpriteName: "monster",
-		SpriteID:   namesToIDs["monster"],
-		Behavior:   nil,
-	}
-	npcs := []*engine.Entity_old{npc}*/
 	roomsConfig := engine.RoomConfiguration{
 		RoomsMax:       config.RoomsMax,
 		RoomsMin:       config.RoomsMin,

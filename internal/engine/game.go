@@ -64,10 +64,12 @@ func NewGame(
 		input:             input,
 	}
 	world.Positions[game.player] = Position(game.gameMap.rooms[0].Center())
+	world.Names[game.player] = "Player"
 	world.Visuals[game.player] = namesToIDs["player"]
 	world.PlayerControlled[game.player] = PlayerControlled{}
 	world.Viewshed[game.player] = NewViewshed(5, TintTorchlight)
 	world.VisibilitySystem(game.gameMap)
+
 	return game, nil
 }
 

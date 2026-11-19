@@ -18,7 +18,7 @@ type Position Point
 type Velocity Vector
 type PlayerControlled struct{}
 type Viewshed struct {
-	VisibleTiles []Point // Or map[Point]bool; reusing slice capacity avoids GC churn
+	VisibleTiles []Point
 	VisionTint   VisionTint
 	Range        int
 	Dirty        bool
@@ -101,9 +101,7 @@ func (w *World) VisibilitySystem(mv MapViewer) {
 			continue
 		}
 
-		viewshed.VisibleTiles = viewshed.VisibleTiles[:0]
 		computeFOV(mv, Point(origin), viewshed)
-		viewshed.Dirty = false
 
 		if _, isPlayer := w.PlayerControlled[entity]; isPlayer {
 			mv.ClearVisible()
