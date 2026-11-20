@@ -81,7 +81,8 @@ func (w *World) MovementSystem(mv MapViewer) error {
 				}
 			} else {
 				if _, isPlayer := w.PlayerControlled[k]; isPlayer {
-					w.Messages = append(w.Messages, "Ouch! You walked into a wall!")
+					w.Messages =
+						append(w.Messages, "Ouch! You walked into a wall!")
 				}
 			}
 		}
@@ -143,7 +144,16 @@ func computeFOV(mv MapViewer, origin Point, viewshed *Viewshed) {
 	maxDistSq := viewshed.Range*viewshed.Range + viewshed.Range
 
 	for octant := 0; octant < 8; octant++ {
-		castLight(mv, origin, maxDistSq, 1, 1.0, 0.0, octantTransforms[octant], viewshed)
+		castLight(
+			mv,
+			origin,
+			maxDistSq,
+			1,
+			1.0,
+			0.0,
+			octantTransforms[octant],
+			viewshed,
+		)
 	}
 
 	viewshed.Dirty = false
@@ -201,7 +211,16 @@ func castLight(
 				startSlope = nextStartSlope
 			} else if isOpaque && j < viewshed.Range {
 				blocked = true
-				castLight(mv, origin, maxDistSq, j+1, startSlope, lSlope, transform, viewshed)
+				castLight(
+					mv,
+					origin,
+					maxDistSq,
+					j+1,
+					startSlope,
+					lSlope,
+					transform,
+					viewshed,
+				)
 				nextStartSlope = rSlope
 			}
 		}
