@@ -1,5 +1,9 @@
 package engine
 
+import (
+	"github.com/FooWho/go-rogue/internal/sparseset"
+)
+
 type VisionTint [4]float32
 
 var (
@@ -9,9 +13,6 @@ var (
 	TintDaylight    = VisionTint{1.00, 1.00, 1.00, 1.00}
 	TintExplored    = VisionTint{0.50, 0.50, 0.50, 1.00}
 )
-
-// The Entity
-type Entity uint32
 
 // The Components
 type Position Point
@@ -25,33 +26,34 @@ type Viewshed struct {
 }
 
 type World struct {
-	nextID Entity
+	pool   *sparseset.EntityPool
+	stores []sparseset.Store
 
-	Positions        map[Entity]Position
-	Velocities       map[Entity]Velocity
-	Visuals          map[Entity]int
-	Names            map[Entity]string
-	PlayerControlled map[Entity]PlayerControlled
-	Viewshed         map[Entity]*Viewshed
-
-	Messages []string
+	Positions  *sparseset.Set[Position]
+	Velocities *sparseset.Set[Velocity]
+	Visuals    *sparseset.Set[int]
+	Names      *sparseset.Set[string]
+	PlayerCon
+	Viewsheds *sparseset.Set[Viewshed]
 }
 
 func NewWorld() *World {
-	return &World{
-		Positions:        make(map[Entity]Position),
-		Velocities:       make(map[Entity]Velocity),
-		Visuals:          make(map[Entity]int),
-		Names:            make(map[Entity]string),
-		PlayerControlled: make(map[Entity]PlayerControlled),
-		Viewshed:         make(map[Entity]*Viewshed),
+	w := &World{
+		pool:      sparseset.NewEntityPool(256),
+		Positions: sparseset.New[Position](256),
+		Viewsheds: sparseset.New[Viewshed](64),
 	}
+
+	// Register all stores so DestroyEntity cleans everything automatically
+	w.stores = []sparseset.Store{
+		w.Positions,
+		w.Viewsheds,
+	}
+	return w
 }
 
-func (w *World) CreateEntity() Entity {
-	id := w.nextID
-	w.nextID++
-	return id
+func (w *World) CreateEntity() sparseset.Entity {
+	return w.pool.Spawn()
 }
 
 // The Systems
