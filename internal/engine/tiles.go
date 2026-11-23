@@ -137,7 +137,7 @@ var allTiles = []*Tile{
 
 // BindTileSpriteIDs maps human-readable sprite names to the renderer's
 // integer IDs.
-func BindTileSpriteIDs(nameToID map[string]int) {
+func BindTileSpriteIDs(nameToID map[string]uint) {
 	for _, t := range allTiles {
 		if id, ok := nameToID[t.SpriteName]; ok {
 			t.SpriteID = id

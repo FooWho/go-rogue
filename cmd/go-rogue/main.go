@@ -99,10 +99,11 @@ func main() {
 	}
 }
 
-// ConfigurationFile holds which set of sprites/tiles we are using - currently
-// "ascii" or "graphic". It defines the maximum number of rooms we will attempt
-// to place when generating the dungeon, the minimum number of rooms we will
-// accept, and the minimum and maximum sizes for a room.
+// ConfigurationFile holds which set of sprites/tiles we are using -
+// currently "ascii" or "graphic". It defines the viewport size,
+// the maximum number of rooms we will attempt to place when generating
+// the dungeon, the minimum number of rooms we will accept, and the minimum
+// and maximum sizes for a room.
 type ConfigurationFile struct {
 	Tileset        string `json:"tileset"`
 	ViewPortCols   int    `json:"viewPortCols"`

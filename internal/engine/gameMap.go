@@ -7,7 +7,7 @@ type Tile struct {
 	Walkable    bool
 	Transparent bool
 	SpriteName  string
-	SpriteID    int
+	SpriteID    uint
 }
 
 type TileState struct {

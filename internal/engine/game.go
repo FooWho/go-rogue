@@ -3,6 +3,8 @@ package engine
 import (
 	"errors"
 	"fmt"
+
+	"github.com/FooWho/go-rogue/internal/sparseset"
 )
 
 // Game represents the game state. It holds a reference to the player and a
@@ -11,9 +13,9 @@ import (
 // SpriteID, a pointer to the [GameMap] struct, and the [Input] handler.
 type Game struct {
 	world             *World
-	player            Entity
+	player            sparseset.Entity
 	renderables       []Renderable
-	namesToIDs        map[string]int
+	namesToIDs        map[string]uint
 	gameMap           *GameMap
 	roomConfiguration RoomConfiguration
 	input             Input
@@ -21,18 +23,27 @@ type Game struct {
 
 type Renderable struct {
 	Position Position
-	SpriteID int
+	SpriteID uint
 }
 
 func (g *Game) GetRenderables() []Renderable {
 	g.renderables = g.renderables[:0]
-	for k, spriteID := range g.world.Visuals {
-		if pos, ok := g.world.Positions[k]; ok {
+	spriteIDs := g.world.Visuals.Values()
+	entities := g.world.Visuals.Entities()
+	for k := range spriteIDs {
+		entity := entities[k]
+		sprite := spriteIDs[k]
+		if pos := g.world.Positions.Get(entity); pos != nil {
+			_, tileState := g.gameMap.GetTileAt(Point(*pos))
+			if !tileState.Visible {
+				continue
+			}
 			g.renderables = append(g.renderables, Renderable{
-				Position: pos,
-				SpriteID: spriteID,
+				Position: *pos,
+				SpriteID: sprite,
 			})
 		}
+
 	}
 	return g.renderables
 }
@@ -51,7 +62,7 @@ func NewGame(
 	mapWidth, mapHeight int,
 	input Input,
 	roomsConfig RoomConfiguration,
-	namesToIDs map[string]int,
+	namesToIDs map[string]uint,
 ) (*Game, error) {
 
 	game := &Game{
@@ -63,11 +74,12 @@ func NewGame(
 		roomConfiguration: roomsConfig,
 		input:             input,
 	}
-	world.Positions[game.player] = Position(game.gameMap.rooms[0].Center())
-	world.Names[game.player] = "Player"
-	world.Visuals[game.player] = namesToIDs["player"]
-	world.PlayerControlled[game.player] = PlayerControlled{}
-	world.Viewshed[game.player] = NewViewshed(5, TintTorchlight)
+	world.Positions.Insert(game.player, Position(game.gameMap.rooms[0].Center()))
+	world.Names.Insert(game.player, "Player")
+	world.Visuals.Insert(game.player, namesToIDs["player"])
+
+	world.PlayerControlled.Insert(game.player, PlayerControlled{})
+	world.Viewsheds.Insert(game.player, NewViewshed(5, TintTorchlight))
 	world.VisibilitySystem(game.gameMap)
 
 	return game, nil
@@ -119,7 +131,7 @@ func (g *Game) Map() MapViewer {
 
 func (g *Game) PlayerViewshed() (VisionTint, bool) {
 
-	if v, ok := g.world.Viewshed[g.player]; ok {
+	if v := g.world.Viewsheds.Get(g.player); v != nil {
 		return v.VisionTint, true
 	} else {
 		return VisionTint{}, false

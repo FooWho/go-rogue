@@ -52,7 +52,7 @@ type Renderer struct {
 // size of the viewable area in terms of tiles.
 func NewRenderer(
 	viewportCols, viewportRows int, tilesetName string,
-) (*Renderer, map[string]int, error) {
+) (*Renderer, map[string]uint, error) {
 
 	assetConfigurationSet, err := loadAssetConfigurationSet()
 	if err != nil {
@@ -141,9 +141,9 @@ func (r *Renderer) Layout(
 // according to those definitions so the [Draw] method doesn't have to perform
 // any of that.
 func loadTileset(
-	assetConfiguration AssetConfiguration) (SpriteSheet, map[string]int, error) {
+	assetConfiguration AssetConfiguration) (SpriteSheet, map[string]uint, error) {
 	tileset := make([]*Sprite, len(assetConfiguration.AssetTilesMap))
-	namesToIDs := make(map[string]int, len(assetConfiguration.AssetTilesMap))
+	namesToIDs := make(map[string]uint, len(assetConfiguration.AssetTilesMap))
 	spriteSheetFile, err := assets.AssetsFS.ReadFile(
 		assetConfiguration.FileName,
 	)
@@ -157,7 +157,7 @@ func loadTileset(
 
 	baseImage := ebiten.NewImageFromImage(img)
 
-	i := 0
+	i := uint(0)
 	halfW := float64(assetConfiguration.TileWidth) / 2
 	halfH := float64(assetConfiguration.TileHeight) / 2
 	for k, v := range assetConfiguration.AssetTilesMap {

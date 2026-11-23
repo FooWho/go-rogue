@@ -1,5 +1,7 @@
 package sparseset
 
+import "math"
+
 type Entity uint32
 
 const (
@@ -44,6 +46,10 @@ func (p *EntityPool) Spawn() Entity {
 		p.freeIndices = p.freeIndices[:len(p.freeIndices)-1]
 
 		return NewEntity(idx, p.generations[idx])
+	}
+
+	if len(p.generations) > math.MaxUint16 {
+		panic("entity pool exhausted")
 	}
 
 	idx := uint16(len(p.generations))

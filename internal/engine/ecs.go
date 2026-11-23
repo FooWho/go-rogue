@@ -18,6 +18,7 @@ var (
 type Position Point
 type Velocity Vector
 type PlayerControlled struct{}
+type Destroyed struct{}
 type Viewshed struct {
 	VisibleTiles []Point
 	VisionTint   VisionTint
@@ -29,25 +30,37 @@ type World struct {
 	pool   *sparseset.EntityPool
 	stores []sparseset.Store
 
-	Positions  *sparseset.Set[Position]
-	Velocities *sparseset.Set[Velocity]
-	Visuals    *sparseset.Set[int]
-	Names      *sparseset.Set[string]
-	PlayerCon
-	Viewsheds *sparseset.Set[Viewshed]
+	Positions        *sparseset.Set[Position]
+	Velocities       *sparseset.Set[Velocity]
+	Visuals          *sparseset.Set[uint]
+	Names            *sparseset.Set[string]
+	PlayerControlled *sparseset.Set[PlayerControlled]
+	Viewsheds        *sparseset.Set[Viewshed]
+	Destroyed        *sparseset.Set[Destroyed]
+
+	Messages []string
 }
 
 func NewWorld() *World {
 	w := &World{
-		pool:      sparseset.NewEntityPool(256),
-		Positions: sparseset.New[Position](256),
-		Viewsheds: sparseset.New[Viewshed](64),
+		pool:             sparseset.NewEntityPool(256),
+		Positions:        sparseset.New[Position](256),
+		Velocities:       sparseset.New[Velocity](64),
+		Visuals:          sparseset.New[uint](256),
+		Names:            sparseset.New[string](256),
+		PlayerControlled: sparseset.New[PlayerControlled](64),
+		Viewsheds:        sparseset.New[Viewshed](64),
+		Destroyed:        sparseset.New[Destroyed](64),
 	}
 
-	// Register all stores so DestroyEntity cleans everything automatically
 	w.stores = []sparseset.Store{
 		w.Positions,
+		w.Velocities,
+		w.Visuals,
+		w.Names,
+		w.PlayerControlled,
 		w.Viewsheds,
+		w.Destroyed,
 	}
 	return w
 }
@@ -56,15 +69,26 @@ func (w *World) CreateEntity() sparseset.Entity {
 	return w.pool.Spawn()
 }
 
+func (w *World) DestroyEntity(e sparseset.Entity) {
+	if !w.pool.IsAlive(e) {
+		return
+	}
+	for _, store := range w.stores {
+		store.Remove(e)
+	}
+	w.pool.Free(e)
+}
+
 // The Systems
 func (w *World) InputSystem(input Input) (bool, error) {
 	if input.WantsToQuit() {
 		return false, ErrQuit
 	}
 
+	entities := w.PlayerControlled.Entities()
 	if v, ok := input.WantsToMove(); ok {
-		for k := range w.PlayerControlled {
-			w.Velocities[k] = Velocity(v)
+		for k := range entities {
+			w.Velocities.Insert(entities[k], Velocity(v))
 		}
 		return true, nil
 	}
@@ -72,52 +96,57 @@ func (w *World) InputSystem(input Input) (bool, error) {
 }
 
 func (w *World) MovementSystem(mv MapViewer) error {
-	for k, vector := range w.Velocities {
-		if pos, ok := w.Positions[k]; ok {
-			newPoint := Point(pos).Add(Vector(vector))
+	entities := w.Velocities.Entities()
+	velocities := w.Velocities.Values()
 
-			if mv.InBounds(newPoint) && mv.IsWalkable(newPoint) {
-				w.Positions[k] = Position(newPoint)
-				if vs, ok := w.Viewshed[k]; ok {
-					vs.Dirty = true
-				}
-			} else {
-				if _, isPlayer := w.PlayerControlled[k]; isPlayer {
-					w.Messages =
-						append(w.Messages, "Ouch! You walked into a wall!")
-				}
-			}
+	for i := range velocities {
+		entity := entities[i]
+		pos := w.Positions.Get(entity)
+		if pos == nil {
+			continue
 		}
-		delete(w.Velocities, k)
+		newPoint := Point(*pos).Add(Vector(velocities[i]))
+		if mv.InBounds(newPoint) && mv.IsWalkable(newPoint) {
+			*pos = Position(newPoint)
+			if viewshed := w.Viewsheds.Get(entity); viewshed != nil {
+				viewshed.Dirty = true
+			}
+		} else if w.PlayerControlled.Has(entity) {
+			w.Messages = append(w.Messages, "Ouch! You walked into a wall!")
+		}
 	}
+	w.Velocities.Clear()
 	return nil
 }
 
 func (w *World) VisibilitySystem(mv MapViewer) {
-	for entity, viewshed := range w.Viewshed {
-		if !viewshed.Dirty {
+	entities := w.Viewsheds.Entities()
+	viewsheds := w.Viewsheds.Values()
+
+	for i := range viewsheds {
+		vs := &viewsheds[i]
+		if !vs.Dirty {
 			continue
 		}
 
-		origin, hasPos := w.Positions[entity]
-		if !hasPos {
-			continue
-		}
+		entity := entities[i]
+		if origin := w.Positions.Get(entity); origin != nil {
+			computeFOV(mv, Point(*origin), vs)
+			vs.Dirty = false
 
-		computeFOV(mv, Point(origin), viewshed)
-
-		if _, isPlayer := w.PlayerControlled[entity]; isPlayer {
-			mv.ClearVisible()
-			for _, pt := range viewshed.VisibleTiles {
-				mv.SetVisible(pt, true)
+			if w.PlayerControlled.Has(entity) {
+				mv.ClearVisible()
+				for _, pt := range vs.VisibleTiles {
+					mv.SetVisible(pt, true)
+				}
 			}
 		}
 	}
 }
 
-func NewViewshed(sightRange int, visionTint VisionTint) *Viewshed {
+func NewViewshed(sightRange int, visionTint VisionTint) Viewshed {
 	maxTiles := (2*sightRange + 1) * (2*sightRange + 1)
-	return &Viewshed{
+	return Viewshed{
 		VisibleTiles: make([]Point, 0, maxTiles),
 		VisionTint:   visionTint,
 		Range:        sightRange,
