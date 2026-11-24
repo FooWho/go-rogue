@@ -7,10 +7,11 @@ import (
 	"github.com/FooWho/go-rogue/internal/sparseset"
 )
 
-// Game represents the game state. It holds a reference to the player and a
-// slice for the [Entity_old] structs. The player is included in this slice
-// as the first element. It also has a map to convert a SpriteName to a
-// SpriteID, a pointer to the [GameMap] struct, and the [Input] handler.
+// Game represents the game state. It holds a reference to the [World],
+// the player [sparseset.Entity] handle, a slice for holding all of the
+// [Renderable] structs for use by the rendering engine, the map of names
+// to sprite IDs, a reference to the [GameMap], the [RoomConfiguration],
+// and a handle to the [Input] engine.
 type Game struct {
 	world             *World
 	player            sparseset.Entity
@@ -21,6 +22,9 @@ type Game struct {
 	input             Input
 }
 
+// Renderable is a struct for holding a [Position] and a spriteID. The
+// [Game] provides a slice of [Renderable] structs to the rendering
+// engine for updating the screen.
 type Renderable struct {
 	Position Position
 	SpriteID uint

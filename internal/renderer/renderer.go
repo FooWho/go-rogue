@@ -21,10 +21,10 @@ type spriteConfig struct {
 	Rotation float64      `json:"rotation"`
 }
 
-// Sprite is the graphical representation for map tiles and entity sprites.
-// A sprite holds the image (which is actually a sub-image from the
-// SpriteSheet), the pre-calculated [ebiten.ColorScale], and the
-// precalculated [ebiten.GeoM].
+// Sprite is the graphical representation for map tiles and the visual
+// representation for any entity. A sprite holds the image (which is
+// actually a sub-image from the SpriteSheet), the pre-calculated
+// [ebiten.ColorScale], and the precalculated [ebiten.GeoM].
 type Sprite struct {
 	Img        *ebiten.Image
 	ColorScale ebiten.ColorScale
@@ -39,9 +39,7 @@ type SpriteSheet []*Sprite
 // Renderer contains the data needed to draw the screen when the game state
 // updates. The [SpriteSheet] is loaded via the [NewRenderer] function.
 type Renderer struct {
-	spriteSheet SpriteSheet
-	//visibleTint                [4]float32
-	//exploredTint               [4]float32
+	spriteSheet                SpriteSheet
 	tileWidth, tileHeight      int
 	viewportCols, viewportRows int
 }
@@ -79,8 +77,8 @@ func NewRenderer(
 
 // Draw is called to render the current frame. It obtains a [engine.MapViewer]
 // to examine the [engine.Tile]s in the [engine.GameMap] and draws the sprite
-// for each [engine.Tile]. It then loops over the [engine.Entity_old] structs
-// and draws them in the same manner.
+// for each [engine.Tile]. It then loops over the [engine.Renderable] structs
+// provided by the [engine.Game] and draws them in the same manner.
 func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 	op := &ebiten.DrawImageOptions{}
 	visibleTint := engine.TintDaylight
@@ -93,7 +91,8 @@ func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 
 	for y := 0; y < r.viewportRows; y++ {
 		for x := 0; x < r.viewportCols; x++ {
-			tile, tileState := gameEngine.Map().GetTileAt(engine.Point{X: x, Y: y})
+			tile, tileState := gameEngine.Map().
+				GetTileAt(engine.Point{X: x, Y: y})
 			if tileState.Explored {
 				visual := r.spriteSheet[tile.SpriteID]
 
@@ -104,9 +103,19 @@ func (r *Renderer) Draw(screen *ebiten.Image, gameEngine *engine.Game) {
 				)
 				op.ColorScale = visual.ColorScale
 				if tileState.Visible {
-					op.ColorScale.Scale(visibleTint[0], visibleTint[1], visibleTint[2], visibleTint[3])
+					op.ColorScale.Scale(
+						visibleTint[0],
+						visibleTint[1],
+						visibleTint[2],
+						visibleTint[3],
+					)
 				} else {
-					op.ColorScale.Scale(engine.TintExplored[0], engine.TintExplored[1], engine.TintExplored[2], engine.TintExplored[3])
+					op.ColorScale.Scale(
+						engine.TintExplored[0],
+						engine.TintExplored[1],
+						engine.TintExplored[2],
+						engine.TintExplored[3],
+					)
 				}
 				screen.DrawImage(visual.Img, op)
 			}
@@ -137,11 +146,12 @@ func (r *Renderer) Layout(
 
 // loadTileset creates a [SpriteSheet] from a PNG in the embedded filesystem.
 // Sprites are loaded using the definitions from assets.json, also contained in
-// the embedded file system. Sprites rotations and color scale are pre-calculated
-// according to those definitions so the [Draw] method doesn't have to perform
-// any of that.
+// the embedded file system. Sprites' rotations and color scale are
+// pre-calculated according to those definitions so the [Draw] method doesn't
+// have to perform any of that.
 func loadTileset(
-	assetConfiguration AssetConfiguration) (SpriteSheet, map[string]uint, error) {
+	assetConfiguration AssetConfiguration) (
+	SpriteSheet, map[string]uint, error) {
 	tileset := make([]*Sprite, len(assetConfiguration.AssetTilesMap))
 	namesToIDs := make(map[string]uint, len(assetConfiguration.AssetTilesMap))
 	spriteSheetFile, err := assets.AssetsFS.ReadFile(
@@ -164,8 +174,10 @@ func loadTileset(
 		tmpSpriteConfig := v
 		x0 := tmpSpriteConfig.ImageLoc.X * assetConfiguration.TileWidth
 		y0 := tmpSpriteConfig.ImageLoc.Y * assetConfiguration.TileHeight
-		x1 := tmpSpriteConfig.ImageLoc.X*assetConfiguration.TileWidth + assetConfiguration.TileWidth
-		y1 := tmpSpriteConfig.ImageLoc.Y*assetConfiguration.TileHeight + assetConfiguration.TileHeight
+		x1 := tmpSpriteConfig.ImageLoc.X*assetConfiguration.TileWidth +
+			assetConfiguration.TileWidth
+		y1 := tmpSpriteConfig.ImageLoc.Y*assetConfiguration.TileHeight +
+			assetConfiguration.TileHeight
 
 		rect := image.Rect(x0, y0, x1, y1)
 		tmpSprite := Sprite{}
