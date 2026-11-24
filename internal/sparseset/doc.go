@@ -1,4 +1,4 @@
-// package sparseset is an implementation of a Sparse Set for the Entity
+// Package sparseset is an implementation of a Sparse Set for the Entity
 // Component System.
 //
 // Set is a generational sparse set that stores components of type T in packed,
@@ -7,17 +7,17 @@
 //
 // A Set consists of three slices:
 //   - dense ([]T): A packed, contiguous slice holding the actual component
-//     values at indices 0..Len()-1.
-//   - denseID ([]Entity): A packed slice parallel to dense (denseID[i] is the
+//     values at indices 0..[Set.Len]()-1.
+//   - denseID ([][Entity]): A packed slice parallel to dense (denseID[i] is the
 //     full generational Entity owning dense[i]). Used both when iterating over
 //     components and to update sparse during O(1) swap-and-pop removals.
-//   - sparse ([]int): Indexed by Entity.Index() (the lower 16 bits of an
+//   - sparse ([]int): Indexed by [Entity.Index]() (the lower 16 bits of an
 //     Entity), mapping an entity's index slot to its location in dense, or -1
 //     if the entity does not have this component.
 //
-// Entity handles are a 32-bit unsigned integers with two parts. The lower 16-bits
+// Entity handles are 32-bit unsigned integers with two parts. The lower 16-bits
 // are the index and the upper 16 bits are the generation. This limits the length
-// of the sparse slice to 65536 elements (rather than 2^32 elements). The
+// of the sparse slice to 65,536 elements (rather than 2^32 elements). The
 // generational part of the handle means we don't need to worry about one
 // entity referencing a stale index to another element. If we have a goblin
 // with index 5 in generation 1, and it dies, we don't have to worry
