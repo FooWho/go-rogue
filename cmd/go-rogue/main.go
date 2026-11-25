@@ -18,8 +18,12 @@ type GameRunner struct {
 	renderer  *renderer.Renderer
 }
 
+// Interface Guard
+var _ ebiten.Game = (*GameRunner)(nil)
+
 // Update is a wrapper function that lets our [engine.Game] handle updates
-// without having to tie that directly to Ebitengine.
+// without having to tie that directly to Ebitengine. It also handles
+// translating [engine.ErrQuit] into [ebiten.Termination]
 func (g *GameRunner) Update() error {
 	err := g.gameState.Update()
 
@@ -30,21 +34,17 @@ func (g *GameRunner) Update() error {
 	return err
 }
 
-// Draw is a wrapper function that keeps our Renderer as separated from
-// Ebitengine as possible. This will allow drop in replacements for other
-// rendering in the future.
+// Draw delegates frame rendering to [renderer.Renderer], keeping the
+// game struct from being coupled to Ebitengine.
 func (g *GameRunner) Draw(screen *ebiten.Image) {
 	g.renderer.Draw(screen, g.gameState)
 }
 
-// Layout is a wrapper function that keeps our Renderer separate from
-// the engine.
+// Layout delegates logical screen sizing to [renderer.Renderer], keeping the
+// game struct from being coupled to Ebitengine.
 func (g *GameRunner) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return g.renderer.Layout(outsideWidth, outsideHeight)
 }
-
-// Interface Guard
-var _ ebiten.Game = (*GameRunner)(nil)
 
 func main() {
 	configurationFile, err := assets.AssetsFS.ReadFile("configuration.json")

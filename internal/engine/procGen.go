@@ -13,7 +13,7 @@ type RectangularRoom struct {
 }
 
 // NewRectangularRoom creates a new [RectangularRoom] with the specified
-// corner points. It changes the [InnerArea] of the room to floor-type
+// corner points. It changes the inner area of the room to floor-type
 // tiles. The outer edge of the room is left as bedrock initially. It
 // will later become a wall. The newly-created room is added to the
 // [GameMap]'s slice of rooms.
@@ -59,16 +59,19 @@ func (rr RectangularRoom) Overlap(room RectangularRoom) bool {
 // intersect any existing rooms. If the room overlaps, we throw that room away.
 // This counts as a possible room, so if it fails, that is one less room the
 // dungeon will have. If the candidate room location fits, the room gets
-// created by the call to [NewRectangularRoom]. Once we have attempted to create
-// the maximum number of rooms, we call [MakeHalls] to connect the rooms and
-// finally we call [MakeWalls] to setup the room walls.
+// created by the call to [GameMap.NewRectangularRoom]. Once we have
+// attempted to create the maximum number of rooms, we call [GameMap.MakeHalls]
+// to connect the rooms and finally we call [GameMap.MakeWalls] to setup the
+// room walls.
 func (gm *GameMap) GenerateDungeon(roomConfig RoomConfiguration) {
 	var overlap = false
 	for range roomConfig.RoomsMax {
-		roomWidth := rand.N(roomConfig.RoomsWidthMax-roomConfig.RoomsWidthMin+1) +
-			roomConfig.RoomsWidthMin
-		roomHeight := rand.N(roomConfig.RoomsHeightMax-roomConfig.RoomsHeightMin+1) +
-			roomConfig.RoomsHeightMin
+		roomWidth :=
+			rand.N(roomConfig.RoomsWidthMax-roomConfig.RoomsWidthMin+1) +
+				roomConfig.RoomsWidthMin
+		roomHeight :=
+			rand.N(roomConfig.RoomsHeightMax-roomConfig.RoomsHeightMin+1) +
+				roomConfig.RoomsHeightMin
 		x := rand.N(gm.cols - roomWidth - 1)
 		y := rand.N(gm.rows - roomHeight - 1)
 		candidateRoom := RectangularRoom{
@@ -82,7 +85,10 @@ func (gm *GameMap) GenerateDungeon(roomConfig RoomConfiguration) {
 			}
 		}
 		if !overlap {
-			gm.NewRectangularRoom(candidateRoom.topLeft, candidateRoom.bottomRight)
+			gm.NewRectangularRoom(
+				candidateRoom.topLeft,
+				candidateRoom.bottomRight,
+			)
 		}
 		overlap = false
 	}
@@ -193,8 +199,8 @@ func (gm *GameMap) touchesFloor(p Point) bool {
 }
 
 // isFloor is a helper to allow us to work directly on [Point]s without
-// having to call [GetIndex] a bunch. If the specified [Point] on the map
-// is a floor tile, return true.
+// having to call [GameMap.GetIndex] a bunch. If the specified [Point] on
+// the map is a floor tile, return true.
 func (gm *GameMap) isFloor(p Point) bool {
 	if !gm.InBounds(p) {
 		return false

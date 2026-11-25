@@ -6,9 +6,9 @@ type Point struct {
 	Y int `json:"y"`
 }
 
-// Vector is just a [Point] under the hood, but use it to provide semantic
-// clarity. For example, if [Entity_old] e needs to move 3 tiles west:
-// e.Move(Vector{-1,0}.Mul(3))
+// Vector is just a [Point] under the hood, but we use it to provide semantic
+// clarity. Where a [Point] stores an x and y location in the [GameMap], a
+// Vector is the delta x and delta y representing an intended move.
 type Vector Point
 
 // Add is used to apply a direction [Vector] to a [Point], resulting

@@ -10,6 +10,7 @@ type Tile struct {
 	SpriteID    uint
 }
 
+// TileState tracks per-cell visibility and exploration status on a [GameMap].
 type TileState struct {
 	Explored bool
 	Visible  bool
@@ -26,6 +27,8 @@ type GameMap struct {
 	rooms      []RectangularRoom
 }
 
+// SetVisible sets the tile at [Point] as visible or not visible. Any tile
+// that is marked as visible is also marked as explored.
 func (gm *GameMap) SetVisible(p Point, visible bool) {
 	if !gm.InBounds(p) {
 		return
@@ -37,6 +40,7 @@ func (gm *GameMap) SetVisible(p Point, visible bool) {
 	}
 }
 
+// ClearVisible sets all tiles to not visible.
 func (gm *GameMap) ClearVisible() {
 	for i := range gm.tileStates {
 		gm.tileStates[i].Visible = false
@@ -44,8 +48,8 @@ func (gm *GameMap) ClearVisible() {
 }
 
 // NewGameMap generates a map for us. It starts by filling the [GameMap] with
-// "bedrock" tiles. It then calls [GenerateDungeon] to carve out a dungeon from
-// the bedrock.
+// "bedrock" tiles. It then calls [GameMap.GenerateDungeon] to carve out a
+// dungeon from the bedrock.
 func NewGameMap(cols, rows int, roomsConfig RoomConfiguration) *GameMap {
 	gm := &GameMap{cols: cols, rows: rows}
 	gm.tiles = make([]*Tile, cols*rows)
@@ -72,29 +76,48 @@ func (gm *GameMap) InBounds(p Point) bool {
 }
 
 // IsWalkable tests if the [Tile] at [Point] is walkable. It is a helper
-// so that [GetIndex] doesn't have to be called in other places and we
-// can operate directly on a [Point].
+// so that [GameMap.GetIndex] doesn't have to be called in other places and we
+// can operate directly on a [Point]. It returns false if p is not inside the
+// map boundary.
 func (gm *GameMap) IsWalkable(p Point) bool {
-	return gm.tiles[gm.GetIndex(p)].Walkable
+	if gm.InBounds(p) {
+		return gm.tiles[gm.GetIndex(p)].Walkable
+	}
+	return false
 }
 
 // IsTransparent tests if the [Tile] at [Point] is transparent. It is a helper
-// so that [GetIndex] doesn't have to be called in other places and we
-// can operate directly on a [Point].
+// so that [GameMap.GetIndex] doesn't have to be called in other places and we
+// can operate directly on a [Point]. It returns false if p is not inside the
+// map boundary.
 func (gm *GameMap) IsTransparent(p Point) bool {
-	return gm.tiles[gm.GetIndex(p)].Transparent
+	if gm.InBounds(p) {
+		return gm.tiles[gm.GetIndex(p)].Transparent
+	}
+	return false
 }
 
+// IsExplored returns the value of the tile at [Point] p's explored flag.
+// It returns false if p is not inside the map boundary.
 func (gm *GameMap) IsExplored(p Point) bool {
-	return gm.tileStates[gm.GetIndex(p)].Explored
+	if gm.InBounds(p) {
+		return gm.tileStates[gm.GetIndex(p)].Explored
+	}
+	return false
 }
 
+// IsVisible returns the value of the tile at [Point] p's visible flag.
+// It returns false if p is not inside the map boundary.
 func (gm *GameMap) IsVisible(p Point) bool {
-	return gm.tileStates[gm.GetIndex(p)].Visible
+	if gm.InBounds(p) {
+		return gm.tileStates[gm.GetIndex(p)].Visible
+	}
+	return false
 }
 
 // IsWall tests if the [Tile] at a [Point] in the [GameMap] is a type
-// of wall. If so, it returns true and if not it returns false.
+// of wall. If so, it returns true and if not it returns false. It returns
+// false if p is not inside the map boundary.
 func (gm *GameMap) IsWall(p Point) bool {
 	if !gm.InBounds(p) {
 		return false
@@ -131,9 +154,10 @@ type MapViewer interface {
 	ClearVisible()
 	IsExplored(p Point) bool
 	InBounds(p Point) bool
-	GetTileAt(p Point) (Tile, TileState)
+	GetTileAt(p Point) (Tile, TileState, bool)
 }
 
+// Interface Guard
 var _ MapViewer = (*GameMap)(nil)
 
 // Width returns the number of columns in the [GameMap].
@@ -146,10 +170,15 @@ func (gm *GameMap) Height() int {
 	return gm.rows
 }
 
-// GetTileAt returns a copy of the [Tile] at the specified [Point] in the
-// [GameMap].
-func (gm *GameMap) GetTileAt(p Point) (Tile, TileState) {
-	return *gm.tiles[gm.GetIndex(p)], gm.tileStates[gm.GetIndex(p)]
+// GetTileAt returns a copy of the [Tile] and [TileState]
+// at the specified [Point] in the [GameMap]. If the specified [Point]
+// is not inside of the map boundary, the [Tile] and [TileState] are
+// uninitialized and we set the boolean flag to false.
+func (gm *GameMap) GetTileAt(p Point) (Tile, TileState, bool) {
+	if !gm.InBounds(p) {
+		return Tile{}, TileState{}, false
+	}
+	return *gm.tiles[gm.GetIndex(p)], gm.tileStates[gm.GetIndex(p)], true
 }
 
 // RoomConfiguration stores the maximum number of rooms we will attempt to

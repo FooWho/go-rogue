@@ -1,7 +1,8 @@
 package sparseset
 
-// Store provides some convenient methods for working with Sparse Sets
-// with generics.
+// Store is a type-erased interface implemented by [Set], allowing heterogeneous
+// component sets (e.g., Set[Position], Set[Velocity]) to be stored and managed
+// together without knowing their concrete component type T.
 type Store interface {
 	Has(e Entity) bool
 	Remove(e Entity)
@@ -9,24 +10,20 @@ type Store interface {
 	Len() int
 }
 
-// Set is the fundamental data type.
-// A Set consists of three slices:
-//   - dense ([]T): A packed, contiguous slice holding the actual component
-//     values at indices 0..Len()-1.
-//   - denseID ([]Entity): A packed slice parallel to dense (denseID[i] is the
-//     full generational Entity owning dense[i]). Used both when iterating over
-//     components and to update sparse during O(1) swap-and-pop removals.
-//   - sparse ([]int): Indexed by Entity.Index() (the lower 16 bits of an
-//     Entity), mapping an entity's index slot to its location in dense, or -1
-//     if the entity does not have this component.
+// Set is the fundamental data type. It is backed by three slices,
+// sparse, denseID, and dense. See the package documentation for a full
+// explanation and examples.
 type Set[T any] struct {
 	sparse  []int
 	denseID []Entity
 	dense   []T
 }
 
-// New creates a Sparse Set for holding components of type T. It will
-// have an initial capacity of initialCap, growing dynamically as needed.
+// New creates a Sparse Set for holding components of type T. A sparse set
+// has three underlying slices, sparse, denseID, and dense. The first slice,
+// sparse, has length and capacity of initialCap. The other two, denseID and
+// dense, have a capacity of initialCap and a length of 0.
+// It will panic if initialCap < 0.
 func New[T any](initialCap int) *Set[T] {
 	sparse := make([]int, initialCap)
 	for i := range sparse {
@@ -64,10 +61,13 @@ func (s *Set[T]) Get(e Entity) *T {
 	return &s.dense[s.sparse[e.Index()]]
 }
 
-// Insert places a copy of val into this set, associated
-// with handle e, overwriting any existing component for e and
-// growing the set's capacity if needed. It will panic if e
-// is [NullEntity].
+// Insert places a copy of val into this set, associated with handle e,
+// overwriting any existing component for e and growing the set's capacity if
+// needed. Overwriting an existing component preserves its location in dense.
+// If Insert() is used to update an existing [Entity], passing a stale
+// [Entity] handle will overwrite the sparse slot for that index, corrupting
+// the mapping for any live entity sharing that index.
+// It will panic if e is [NullEntity].
 func (s *Set[T]) Insert(e Entity, val T) {
 	if e == NullEntity {
 		panic("sparseset: cannot insert NullEntity")
@@ -96,7 +96,9 @@ func (s *Set[T]) Insert(e Entity, val T) {
 }
 
 // Remove deletes the component associated with the entity handle e from
-// this set.
+// this set. It is safe (and a no-op) to call Remove() with a stale or
+// invalid [Entity]. Removal is handled via swap-and-pop, which gives O(1)
+// removal, but does not preserve order for [Set.Entities] and [Set.Values].
 func (s *Set[T]) Remove(e Entity) {
 	if !s.Has(e) {
 		return
@@ -119,7 +121,10 @@ func (s *Set[T]) Remove(e Entity) {
 	s.sparse[idx] = -1
 }
 
-// Clear removes all components from this set.
+// Clear removes all components from this set. It does retain the allocated
+// memory to prevent the need to garbage collect the slice or to reallocate
+// the slice in the future. Any components it contains are nulled out so that
+// they can be garbage collected.
 func (s *Set[T]) Clear() {
 	for _, e := range s.denseID {
 		s.sparse[e.Index()] = -1
@@ -135,14 +140,17 @@ func (s *Set[T]) Len() int {
 }
 
 // Entities returns a contiguous backing slice of the entity handles that have
-// a component in this set. It is aligned 1:1 with [Set.Values].
+// a component in this set. It is aligned 1:1 with [Set.Values]. Callers must
+// not modify the returned slice, and it must not be retained across calls
+// to [Set.Insert], [Set.Remove], or [Set.Clear].
 func (s *Set[T]) Entities() []Entity {
 	return s.denseID
 }
 
-// Values returns the contiguous backing  slice containing of components
-// contained in this set. It is aligned 1:1 with [Set.Entities]. Elements may
-// be mutated in place/
+// Values returns the contiguous backing slice of components in this set,
+// aligned 1:1 with [Set.Entities]. Elements may be mutated in place, but
+// callers must not append to or reslice the returned slice, nor retain it
+// across calls to [Set.Insert], [Set.Remove], or [Set.Clear].
 func (s *Set[T]) Values() []T {
 	return s.dense
 }

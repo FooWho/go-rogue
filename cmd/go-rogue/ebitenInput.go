@@ -6,14 +6,19 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-// EbitenInput is an empty struct to hang the input intentions on. This is what
-// allows our engine to not need to know anything about Ebitengine or about
-// input in general.
+// EbitenInput implements [engine.Input] using Ebitengine's keyboard state,
+// decoupling the engine from Ebitengine.
 type EbitenInput struct{}
 
 // WantsToMove returns the direction of movement the player has signaled as a
 // [engine.Vector]. If the player has pressed a directional key, we return
-// the appropriate direction. Otherwise, we stay still.
+// the appropriate direction. Otherwise, we stay still. It supports
+// wasd movement, arrow key movement, and numpad movement. It only
+// indicates movement if the key has just been pressed since the last update.
+// If a movement key is held, it was not "just pressed" and their is no
+// movement. In the case of no movement, it returns an uninitialized
+// [engine.Vector] and false. If there is movement, the [engine.Vector] is
+// set appropriately and returned with true.
 func (i *EbitenInput) WantsToMove() (engine.Vector, bool) {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyUp) ||
