@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/FooWho/go-rogue/internal/sparseset"
+	"github.com/stemstation/go-rogue/internal/sparseset"
 )
 
 // Game represents the game state. It holds a reference to the [World],

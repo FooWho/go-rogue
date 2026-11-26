@@ -8,8 +8,8 @@ import (
 	_ "image/png"
 	"math"
 
-	"github.com/FooWho/go-rogue/assets"
-	"github.com/FooWho/go-rogue/internal/engine"
+	"github.com/stemstation/go-rogue/assets"
+	"github.com/stemstation/go-rogue/internal/engine"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 

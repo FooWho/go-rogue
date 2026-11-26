@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/FooWho/go-rogue/assets"
-	"github.com/FooWho/go-rogue/internal/engine"
-	"github.com/FooWho/go-rogue/internal/renderer"
+	"github.com/stemstation/go-rogue/assets"
+	"github.com/stemstation/go-rogue/internal/engine"
+	"github.com/stemstation/go-rogue/internal/renderer"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 

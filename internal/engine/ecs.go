@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"github.com/FooWho/go-rogue/internal/sparseset"
+	"github.com/stemstation/go-rogue/internal/sparseset"
 )
 
 // VisionTint is an array of 4 float32s. These are normalized RGBA multipliers

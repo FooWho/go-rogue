@@ -1,4 +1,4 @@
-module github.com/FooWho/go-rogue
+module github.com/stemstation/go-rogue
 
 go 1.27.1
 

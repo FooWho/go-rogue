@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/FooWho/go-rogue/internal/engine"
+	"github.com/stemstation/go-rogue/internal/engine"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
